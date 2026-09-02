@@ -6,12 +6,13 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --paper:#F4F6F3; --surface:#FFFFFF; --sunk:#EBEFEC; --ink:#1A2320; --muted:#5E6B66; --faint:#8C978F;
-  --rule:#D6DCD8; --rule-strong:#B9C2BD;
-  --accent:#1E5A66; --accent-ink:#FFFFFF; --accent-soft:#DDEBEE;
-  --good:#2C7A4B; --good-soft:#DCEFE3; --warn:#B8791E; --warn-soft:#F6EBD3; --crit:#B03A3A; --crit-soft:#F5DCDC;
-  --slack:#5B3B8C; --slack-soft:#E8DFF3; --skool:#1F6B47; --skool-soft:#DFF0E8;
-  --shadow:0 1px 2px rgba(26,35,32,.06), 0 6px 20px -12px rgba(26,35,32,.25);
+  --paper:#F7F3F1; --surface:#FFFFFF; --sunk:#F0EAEB; --ink:#363B52; --muted:#7A82A0; --faint:#A9AFC4;
+  --rule:#E6DFE3; --rule-strong:#CDC6D3;
+  --accent:#8599B8; --accent-ink:#FFFFFF; --accent-soft:#E6ECF6;
+  --good:#4E9C94; --good-soft:#DCEFEC; --warn:#E08A3C; --warn-soft:#FCE6D2; --crit:#D4736A; --crit-soft:#F9DFDB;
+  --slack:#C2678F; --slack-soft:#FBDDE8; --skool:#6F8EC2; --skool-soft:#E2ECF7;
+  --sunrise:linear-gradient(90deg,#92ABD3 0%,#E49C95 45%,#FAC098 75%,#8599B8 100%);
+  --shadow:0 1px 2px rgba(54,59,82,.06), 0 6px 20px -12px rgba(54,59,82,.28);
   --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
   --font-body:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -19,26 +20,28 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#141918; --surface:#1C2321; --sunk:#222B28; --ink:#E7ECE9; --muted:#9AA6A1; --faint:#6F7B76;
-    --rule:#2C3633; --rule-strong:#3D4945;
-    --accent:#5FB3C1; --accent-ink:#0F1A1C; --accent-soft:#1B3238;
-    --good:#5CC285; --good-soft:#1B3326; --warn:#E0A54A; --warn-soft:#3A2D14; --crit:#E06B6B; --crit-soft:#3E1F1F;
-    --slack:#C9B3EA; --slack-soft:#2E2340; --skool:#8ED4AE; --skool-soft:#1B3326;
+    --paper:#22263A; --surface:#2B3047; --sunk:#343953; --ink:#EEE8EA; --muted:#A9AFC8; --faint:#7D849F;
+    --rule:#3B415A; --rule-strong:#4F5675;
+    --accent:#92ABD3; --accent-ink:#1B1F30; --accent-soft:#35415F;
+    --good:#95C7C2; --good-soft:#2C4A48; --warn:#FAC098; --warn-soft:#4B3A2B; --crit:#E49C95; --crit-soft:#4E3234;
+    --slack:#F490B9; --slack-soft:#4A2F3E; --skool:#BEE4E7; --skool-soft:#2E4649;
+    --sunrise:linear-gradient(90deg,#92ABD3 0%,#E49C95 45%,#FAC098 75%,#8599B8 100%);
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#141918; --surface:#1C2321; --sunk:#222B28; --ink:#E7ECE9; --muted:#9AA6A1; --faint:#6F7B76;
-  --rule:#2C3633; --rule-strong:#3D4945;
-  --accent:#5FB3C1; --accent-ink:#0F1A1C; --accent-soft:#1B3238;
-  --good:#5CC285; --good-soft:#1B3326; --warn:#E0A54A; --warn-soft:#3A2D14; --crit:#E06B6B; --crit-soft:#3E1F1F;
-  --slack:#C9B3EA; --slack-soft:#2E2340; --skool:#8ED4AE; --skool-soft:#1B3326;
+  --paper:#22263A; --surface:#2B3047; --sunk:#343953; --ink:#EEE8EA; --muted:#A9AFC8; --faint:#7D849F;
+  --rule:#3B415A; --rule-strong:#4F5675;
+  --accent:#92ABD3; --accent-ink:#1B1F30; --accent-soft:#35415F;
+  --good:#95C7C2; --good-soft:#2C4A48; --warn:#FAC098; --warn-soft:#4B3A2B; --crit:#E49C95; --crit-soft:#4E3234;
+  --slack:#F490B9; --slack-soft:#4A2F3E; --skool:#BEE4E7; --skool-soft:#2E4649;
+  --sunrise:linear-gradient(90deg,#92ABD3 0%,#E49C95 45%,#FAC098 75%,#8599B8 100%);
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--paper);border-top:4px solid transparent;border-image:var(--sunrise) 1;color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -87,8 +90,8 @@ input[type=date],input[type=time]{font-family:var(--font-mono);font-size:13px}
 .check .n{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
 
 /* counters + taps */
-.counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:16px}
-.counter{background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-height:64px}
+.counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:0;background:var(--surface);border:1px solid var(--rule);border-right:0;border-bottom:0;margin-bottom:16px}
+.counter{background:var(--surface);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-height:64px}
 .counter .n{font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
 .counter .k{font-size:11.5px;color:var(--muted);line-height:1.25}
 .taps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
@@ -151,6 +154,28 @@ tr:last-child td{border-bottom:0}
 .settings .rowset{display:grid;grid-template-columns:1fr 160px auto;gap:8px;align-items:center;padding:4px 0}
 .settings input[type=text]{width:100%}
 
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule-strong);margin-top:18px;overflow-x:auto}
+.tab{background:transparent;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--muted);white-space:nowrap;margin-bottom:-1px}
+.tab:hover{color:var(--ink)}
+.tab.active{color:var(--ink);border-bottom-color:var(--crit)}
+.tab .cnt{font-family:var(--font-mono);font-weight:400;font-size:11.5px;margin-left:6px;color:var(--faint)}
+section[data-tab]{display:none;margin-top:24px}
+section[data-tab].active{display:block}
+/* history */
+.days{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.daycard{background:var(--surface);border:1px solid var(--rule-strong);border-radius:6px;padding:12px 14px;text-align:left;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:6px}
+.daycard:hover{background:var(--accent-soft)}
+.daycard .d{font-family:var(--font-display);font-weight:600;font-size:14px}
+.daycard .m{font-family:var(--font-mono);font-size:12px;color:var(--muted);line-height:1.5}
+.daycard .m b{color:var(--ink);font-weight:500}
+.daycard.today{border-color:var(--accent)}
+.dayhead{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.dayhead h3{font-size:17px;font-weight:600}
+.dutyline{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.dutyline span{font-family:var(--font-mono);font-size:12px;padding:3px 8px;border-radius:3px;background:var(--crit-soft);color:var(--crit)}
+.dutyline span.ok{background:var(--good-soft);color:var(--good)}
+
 .ro .rw{display:none !important}
 body:not(.ro) #unlock{display:none}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-size:13.5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
@@ -175,8 +200,16 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
     <div class="status" id="status"><span class="dot"></span><span id="statusText">Loading</span><button class="btn ghost small" id="unlock" title="Enter the edit key">Unlock</button></div>
   </header>
 
-  <section id="today">
-    <div class="sechead"><h2 id="todayTitle">Today</h2><div class="meta"><span id="todayMeta"></span><label style="display:flex;gap:6px;align-items:center">Go back to <select id="viewDay" class="btn small" disabled><option value="">Today</option></select></label><button class="btn ghost small" id="viewToday" hidden>Back to today</button></div></div>
+  <nav class="tabs" id="tabs">
+    <button class="tab active" data-go="today">Today</button>
+    <button class="tab" data-go="queue">Queue<span class="cnt" id="tabQueueN"></span></button>
+    <button class="tab" data-go="history">Previous days<span class="cnt" id="tabHistN"></span></button>
+    <button class="tab" data-go="week">Week</button>
+    <button class="tab rw" data-go="setup">Setup</button>
+  </nav>
+
+  <section id="today" data-tab="today" class="active">
+    <div class="sechead"><h2 id="todayTitle">Today</h2><div class="meta"><span id="todayMeta"></span></div></div>
 
     <div class="sub-h">Standing duties — tick each pass, every tick is timestamped</div>
     <div class="checklist" id="checklist"></div>
@@ -191,7 +224,7 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
     <div class="ledger" id="todayLog"></div>
   </section>
 
-  <section id="queue">
+  <section id="queue" data-tab="queue">
     <div class="sechead"><h2>The Queue</h2><div class="meta" id="queueMeta"></div></div>
     <p class="hint">Everything that has landed on you and is still open — with where it came from and when. If it isn't here, it wasn't assigned.</p>
     <form class="rw" id="qform">
@@ -211,7 +244,7 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
     </form>
     <div class="qtools">
       <select id="qFilter" class="btn small"><option value="all">All categories</option></select>
-      <select id="qSort" class="btn small"><option value="landed">Oldest first</option><option value="due">By due date</option><option value="cat">By category</option></select>
+      <select id="qSort" class="btn small"><option value="newest">Newest first</option><option value="landed">Oldest first</option><option value="due">By due date</option><option value="cat">By category</option></select>
       <div class="spacer"></div>
       <span id="qOverflow" style="font-size:12.5px;color:var(--muted)"></span>
     </div>
@@ -219,12 +252,27 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
     <details class="closed" id="closedWrap"><summary id="closedSummary">Closed</summary><div class="ledger" id="queueClosed"></div></details>
   </section>
 
-  <section id="week">
+  <section id="history" data-tab="history">
+    <div class="sechead"><h2>Previous days</h2><div class="meta" id="histMeta"></div></div>
+    <div id="histList" class="days"></div>
+    <div id="histDay" hidden>
+      <button class="btn ghost small" id="histBack" style="margin-bottom:10px">← All days</button>
+      <div class="dayhead"><h3 id="histTitle"></h3><span id="histSummary" class="mono" style="font-size:12.5px;color:var(--muted)"></span></div>
+      <div class="sub-h" style="margin-top:0">Standing duties that day</div>
+      <div class="dutyline" id="histDuties"></div>
+      <div class="sub-h">Landed that day</div>
+      <div class="ledger" id="histLanded"></div>
+      <div class="sub-h">Everything logged, newest first</div>
+      <div class="ledger" id="histLog"></div>
+    </div>
+  </section>
+
+  <section id="week" data-tab="week">
     <div class="sechead"><h2>Week</h2><div class="meta">Rolling 7 days</div></div>
     <div class="week"><table id="weekTable"></table></div>
   </section>
 
-  <section id="setup" class="rw">
+  <section id="setup" data-tab="setup" class="rw">
     <div class="sechead"><h2>Setup</h2><div class="meta">Your standing duties and categories — only you see this</div></div>
     <div class="settings">
       <div class="sub-h" style="margin-top:0">Standing duties (appear on the checklist every day)</div>
@@ -245,23 +293,23 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
 'use strict';
 // ---------- categories (color-coded across queue and week) ----------
 const CATS = [
-  {id:'email', name:'Email', color:'#1E5A66'},
-  {id:'skool', name:'Skool', color:'#1F6B47'},
-  {id:'slack', name:'Slack / team', color:'#5B3B8C'},
-  {id:'sales', name:'Sales entry (sheet + CRM)', color:'#B8791E'},
-  {id:'payments', name:'Payments', color:'#B03A3A'},
-  {id:'onboarding', name:'Onboarding', color:'#2C7A4B'},
-  {id:'followup', name:'Client follow-up', color:'#3B6FB6'},
-  {id:'gbp', name:'Google Business Profile', color:'#8A5A2B'},
-  {id:'other', name:'Other', color:'#7A8480'},
+  {id:'email', name:'Email', color:'#8599B8'},
+  {id:'skool', name:'Skool', color:'#6F8EC2'},
+  {id:'slack', name:'Slack / team', color:'#F490B9'},
+  {id:'sales', name:'Sales entry (sheet + CRM)', color:'#F49F51'},
+  {id:'payments', name:'Payments', color:'#E49C95'},
+  {id:'onboarding', name:'Onboarding', color:'#95C7C2'},
+  {id:'followup', name:'Client follow-up', color:'#92ABD3'},
+  {id:'gbp', name:'Google Business Profile', color:'#FAC098'},
+  {id:'other', name:'Other', color:'#A9AFC4'},
 ];
 const catById = Object.fromEntries(CATS.map(c => [c.id, c]));
 
 // ---------- defaults for a fresh ledger (editable in Setup) ----------
 const DEFAULT_DUTIES = [
-  {id:'em1', name:'Email — account 1', cat:'email'},
-  {id:'em2', name:'Email — account 2', cat:'email'},
-  {id:'em3', name:'Email — account 3', cat:'email'},
+  {id:'em1', name:'Team email checked', cat:'email'},
+  {id:'em2', name:'Cailin email checked', cat:'email'},
+  {id:'em3', name:'Nate email checked', cat:'email'},
   {id:'skool', name:'Skool messages answered', cat:'skool'},
   {id:'slack', name:'Slack read (payments + new sales checked)', cat:'slack'},
 ];
@@ -285,6 +333,9 @@ function normalize(s) {
   if (!Array.isArray(s.settings.duties)) s.settings.duties = DEFAULT_DUTIES.map(d => ({...d}));
   if (!Array.isArray(s.settings.taps)) s.settings.taps = DEFAULT_TAPS.map(d => ({...d}));
   s.log = s.log || []; s.queue = s.queue || [];
+  // rename the placeholder email duties if they were never customized
+  const OLD = {em1:'Email — account 1', em2:'Email — account 2', em3:'Email — account 3'};
+  s.settings.duties.forEach(d => { if (OLD[d.id] && d.name === OLD[d.id]) d.name = DEFAULT_DUTIES.find(x => x.id === d.id).name; });
   // migrate v1 queue items
   s.queue.forEach(q => { if (!q.cat) q.cat = 'other'; if (q.source === 'assigned') q.source = 'boss'; if (q.source === 'recurring') q.source = 'self'; });
   return s;
@@ -300,7 +351,6 @@ const fmtDateShort = k => fromKey(k).toLocaleDateString(undefined, {month:'short
 const fmtDateLong = d => d.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric', year:'numeric'});
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const TODAY = dayKey();
-let VIEW_DAY = TODAY;
 
 // ---------- read-only ----------
 let readOnly = false;
@@ -356,13 +406,9 @@ document.getElementById('unlock').addEventListener('click', () => {
   editKey = k.trim(); try { localStorage.setItem('ledger-edit-key', editKey); } catch (e) {}
   location.reload();
 });
+let DAYS = [];
 async function loadDays() {
-  try {
-    const j = await (await fetch('/api/days')).json();
-    const sel = document.getElementById('viewDay'); const cur = sel.value;
-    const opts = j.days.filter(d => d.day !== TODAY).map(d => `<option value="${d.day}">${fmtDateShort(d.day)} · ${d.saves} save${d.saves === 1 ? '' : 's'}</option>`).join('');
-    sel.innerHTML = `<option value="">Today</option>` + opts; sel.value = cur; sel.disabled = !opts;
-  } catch (e) {}
+  try { const j = await (await fetch('/api/days')).json(); DAYS = j.days || []; renderHistory(); } catch (e) {}
 }
 
 // ---------- toast ----------
@@ -386,11 +432,11 @@ const logCat = x => {
 
 // ---------- render ----------
 function render() {
-  const viewing = VIEW_DAY !== TODAY;
-  const dayLog = S.log.filter(x => x.day === VIEW_DAY);
+  const viewing = false;
+  const dayLog = S.log.filter(x => x.day === TODAY);
   const openQ = S.queue.filter(q => !q.done);
-  const closedDay = S.queue.filter(q => q.done && q.doneDay === VIEW_DAY);
-  const landedDay = S.queue.filter(q => q.day === VIEW_DAY);
+  const closedDay = S.queue.filter(q => q.done && q.doneDay === TODAY);
+  const landedDay = S.queue.filter(q => q.day === TODAY);
   document.getElementById('dateline').textContent = fmtDateLong(new Date());
   const dutiesDone = new Set(dayLog.filter(x => x.kind === 'duty').map(x => x.ref));
   document.getElementById('tally').innerHTML = [
@@ -404,6 +450,8 @@ function render() {
   renderQueue(openQ);
   renderWeek();
   renderSetup();
+  renderHistory();
+  document.getElementById('tabQueueN').textContent = openQ.length || '';
   document.getElementById('footLeft').textContent = `${S.log.length} entries on record · ${S.queue.length} queue items`;
   const first = S.log.length ? S.log.reduce((a, b) => a.day < b.day ? a : b).day : TODAY;
   document.getElementById('footRight').textContent = `Ledger since ${fmtDateShort(first)}`;
@@ -411,10 +459,6 @@ function render() {
 
 // ---------- today ----------
 function renderToday(dayLog, viewing, closedDay) {
-  document.getElementById('todayTitle').textContent = viewing ? fmtDateLong(fromKey(VIEW_DAY)) : 'Today';
-  document.getElementById('viewToday').hidden = !viewing;
-  document.getElementById('taps').style.display = viewing ? 'none' : '';
-  document.getElementById('noteform').style.display = viewing ? 'none' : '';
   // checklist
   document.getElementById('checklist').innerHTML = S.settings.duties.map(d => {
     const passes = dayLog.filter(x => x.kind === 'duty' && x.ref === d.id);
@@ -442,7 +486,7 @@ function renderToday(dayLog, viewing, closedDay) {
     : `<div class="row empty">${viewing ? 'No entries on record for this day.' : "The day's log starts with the first tick."}</div>`;
 }
 document.getElementById('checklist').addEventListener('click', e => {
-  const b = e.target.closest('[data-duty]'); if (!b || readOnly || VIEW_DAY !== TODAY) return;
+  const b = e.target.closest('[data-duty]'); if (!b || readOnly) return;
   addLog('duty', b.dataset.duty);
 });
 document.getElementById('taps').addEventListener('click', e => {
@@ -456,8 +500,57 @@ document.getElementById('noteform').addEventListener('submit', e => {
   addLog('note', null, v); inp.value = '';
 });
 document.getElementById('todayLog').addEventListener('click', e => { const b = e.target.closest('[data-rm-log]'); if (b && !readOnly) removeLog(b.dataset.rmLog); });
-document.getElementById('viewDay').addEventListener('change', e => { VIEW_DAY = e.target.value || TODAY; render(); });
-document.getElementById('viewToday').addEventListener('click', () => { VIEW_DAY = TODAY; document.getElementById('viewDay').value = ''; render(); });
+
+// ---------- tabs ----------
+let TAB = 'today';
+try { const t = localStorage.getItem('ledger-tab'); if (t) TAB = t; } catch (e) {}
+function showTab(id) {
+  TAB = id;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.go === id));
+  document.querySelectorAll('section[data-tab]').forEach(sec => sec.classList.toggle('active', sec.dataset.tab === id));
+  try { localStorage.setItem('ledger-tab', id); } catch (e) {}
+  window.scrollTo({top:0});
+}
+document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showTab(b.dataset.go); });
+
+// ---------- history ----------
+let HIST_DAY = null;
+function daySummary(k) {
+  const log = S.log.filter(x => x.day === k);
+  const duties = new Set(log.filter(x => x.kind === 'duty').map(x => x.ref));
+  return { log, duties: duties.size, actions: log.filter(x => x.kind === 'tap').length, notes: log.filter(x => x.kind === 'note').length,
+    landed: S.queue.filter(q => q.day === k).length, closed: S.queue.filter(q => q.done && q.doneDay === k).length,
+    openEnd: S.queue.filter(q => q.day <= k && (!q.done || q.doneDay > k)).length };
+}
+function renderHistory() {
+  const known = new Set(DAYS.map(d => d.day));
+  S.log.forEach(x => known.add(x.day)); S.queue.forEach(q => { known.add(q.day); if (q.doneDay) known.add(q.doneDay); });
+  const days = [...known].filter(k => k && k < TODAY).sort().reverse();
+  document.getElementById('tabHistN').textContent = days.length || '';
+  document.getElementById('histMeta').textContent = days.length ? `${days.length} day${days.length === 1 ? '' : 's'} on record` : 'Nothing before today yet';
+  const list = document.getElementById('histList'), detail = document.getElementById('histDay');
+  if (HIST_DAY) {
+    list.hidden = true; detail.hidden = false;
+    const k = HIST_DAY, sm = daySummary(k);
+    document.getElementById('histTitle').textContent = fmtDateLong(fromKey(k));
+    document.getElementById('histSummary').textContent = `${sm.duties}/${S.settings.duties.length} duties · ${sm.actions} actions · ${sm.landed} landed · ${sm.closed} closed · ${sm.openEnd} still open at end of day`;
+    document.getElementById('histDuties').innerHTML = S.settings.duties.map(d => { const n = sm.log.filter(x => x.kind === 'duty' && x.ref === d.id).length; return `<span class="${n ? 'ok' : ''}">${n ? '✓' : '✗'} ${esc(d.name)}${n > 1 ? ' ×' + n : ''}</span>`; }).join('');
+    const landed = S.queue.filter(q => q.day === k);
+    document.getElementById('histLanded').innerHTML = landed.length ? landed.map(qRow).join('') : `<div class="row empty">Nothing landed that day.</div>`;
+    const rows = sm.log.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${x.kind === 'duty' ? 'duty' : x.kind === 'tap' ? 'action' : 'note'}</span>${esc(logLabel(x))}`}))
+      .concat(S.queue.filter(q => q.done && q.doneDay === k).map(q => ({ts:q.doneTs || (k + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}`})))
+      .sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+    document.getElementById('histLog').innerHTML = rows.length ? rows.map(r => `<div class="row"><span class="ts">${fmtTime(r.ts)}</span><span>${r.html}</span><span></span></div>`).join('') : `<div class="row empty">No entries on record for this day.</div>`;
+    return;
+  }
+  list.hidden = false; detail.hidden = true;
+  list.innerHTML = days.length ? days.map(k => { const sm = daySummary(k); return `<button class="daycard" data-day="${k}">
+    <div class="d">${fromKey(k).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'})}</div>
+    <div class="m"><b>${sm.duties}/${S.settings.duties.length}</b> duties · <b>${sm.actions}</b> actions<br><b>${sm.landed}</b> landed · <b>${sm.closed}</b> closed · <b>${sm.openEnd}</b> left open</div>
+  </button>`; }).join('') : `<div class="hint">Each day shows up here after its first save. Today is on the Today tab.</div>`;
+}
+document.getElementById('histList').addEventListener('click', e => { const b = e.target.closest('[data-day]'); if (b) { HIST_DAY = b.dataset.day; renderHistory(); } });
+document.getElementById('histBack').addEventListener('click', () => { HIST_DAY = null; renderHistory(); });
 
 // ---------- queue ----------
 const SRC_LABEL = {boss:'from a boss', slack:'from Slack', email:'from email', skool:'from Skool', self:'self-assigned'};
@@ -486,7 +579,8 @@ function renderQueue(openQ) {
   const filter = fSel.value, sort = document.getElementById('qSort').value;
   let list = openQ.slice();
   if (filter !== 'all') list = list.filter(q => q.cat === filter);
-  if (sort === 'due') list.sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || a.day.localeCompare(b.day));
+  if (sort === 'newest') list.sort((a, b) => b.day.localeCompare(a.day) || (b.ts || '').localeCompare(a.ts || ''));
+  else if (sort === 'due') list.sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || a.day.localeCompare(b.day));
   else if (sort === 'cat') list.sort((a, b) => a.cat.localeCompare(b.cat) || a.day.localeCompare(b.day));
   else list.sort((a, b) => a.day.localeCompare(b.day) || (a.ts || '').localeCompare(b.ts || ''));
   const bossN = openQ.filter(q => q.source === 'boss').length, over = openQ.filter(q => q.due && q.due < TODAY).length, old = openQ.filter(q => daysBetween(q.day, TODAY) >= 3).length;
@@ -581,6 +675,7 @@ document.getElementById('addTap').addEventListener('click', () => { if (readOnly
 
 // ---------- go ----------
 render();
+showTab(readOnly && TAB === 'setup' ? 'today' : TAB);
 boot();
 setInterval(() => { if (dayKey() !== TODAY) location.reload(); }, 60000);
 })();
