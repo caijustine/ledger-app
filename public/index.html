@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Daily Work Ledger</title>
+<meta name="description" content="A timestamped ledger of what landed, what got done, and what is still open.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --paper:#F4F6F3; --surface:#FFFFFF; --sunk:#EBEFEC; --ink:#1A2320; --muted:#5E6B66; --faint:#8C978F;
+  --rule:#D6DCD8; --rule-strong:#B9C2BD;
+  --accent:#1E5A66; --accent-ink:#FFFFFF; --accent-soft:#DDEBEE;
+  --good:#2C7A4B; --good-soft:#DCEFE3; --warn:#B8791E; --warn-soft:#F6EBD3; --crit:#B03A3A; --crit-soft:#F5DCDC;
+  --slack:#5B3B8C; --slack-soft:#E8DFF3; --skool:#1F6B47; --skool-soft:#DFF0E8;
+  --shadow:0 1px 2px rgba(26,35,32,.06), 0 6px 20px -12px rgba(26,35,32,.25);
+  --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --font-body:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#141918; --surface:#1C2321; --sunk:#222B28; --ink:#E7ECE9; --muted:#9AA6A1; --faint:#6F7B76;
+    --rule:#2C3633; --rule-strong:#3D4945;
+    --accent:#5FB3C1; --accent-ink:#0F1A1C; --accent-soft:#1B3238;
+    --good:#5CC285; --good-soft:#1B3326; --warn:#E0A54A; --warn-soft:#3A2D14; --crit:#E06B6B; --crit-soft:#3E1F1F;
+    --slack:#C9B3EA; --slack-soft:#2E2340; --skool:#8ED4AE; --skool-soft:#1B3326;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#141918; --surface:#1C2321; --sunk:#222B28; --ink:#E7ECE9; --muted:#9AA6A1; --faint:#6F7B76;
+  --rule:#2C3633; --rule-strong:#3D4945;
+  --accent:#5FB3C1; --accent-ink:#0F1A1C; --accent-soft:#1B3238;
+  --good:#5CC285; --good-soft:#1B3326; --warn:#E0A54A; --warn-soft:#3A2D14; --crit:#E06B6B; --crit-soft:#3E1F1F;
+  --slack:#C9B3EA; --slack-soft:#2E2340; --skool:#8ED4AE; --skool-soft:#1B3326;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px 80px}
+h1,h2,h3{font-family:var(--font-display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+
+.topbar{position:sticky;top:0;z-index:20;background:var(--paper);border-bottom:1px solid var(--rule-strong);padding:12px 0 10px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.topbar h1{font-size:22px;font-weight:700;line-height:1.1}
+.topbar .sub{color:var(--muted);font-size:13px;margin-top:2px}
+.tally{display:flex;gap:18px;align-items:baseline;flex-wrap:wrap}
+.tally .n{font-family:var(--font-display);font-size:22px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.tally .k{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-family:var(--font-display);font-weight:600}
+.status{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);font-family:var(--font-mono)}
+.status .dot{width:8px;height:8px;border-radius:50%;background:var(--faint)}
+.status.saving .dot{background:var(--warn)} .status.saved .dot{background:var(--good)} .status.error .dot{background:var(--crit)} .status.ro .dot{background:var(--accent)}
+
+section{margin-top:40px}
+.sechead{display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:16px;flex-wrap:wrap}
+.sechead h2{font-size:18px;font-weight:600}
+.sechead .meta{color:var(--muted);font-size:13px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hint{color:var(--muted);font-size:13px;margin:0 0 12px}
+.sub-h{font-family:var(--font-display);font-size:11px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px}
+
+input[type=text],input[type=date],input[type=time],select,textarea{background:var(--surface);border:1px solid var(--rule-strong);border-radius:4px;padding:8px 10px;font-size:14px;color:var(--ink)}
+input[type=date],input[type=time]{font-family:var(--font-mono);font-size:13px}
+.btn{background:var(--surface);border:1px solid var(--rule-strong);border-radius:4px;padding:8px 14px;font-weight:600;font-size:13.5px;font-family:var(--font-display);white-space:nowrap}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.small{padding:4px 10px;font-size:12px}
+.btn.ghost{border-color:transparent;background:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--sunk);color:var(--ink)}
+
+/* daily checklist */
+.checklist{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-bottom:6px}
+.check{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--rule-strong);border-radius:6px;padding:10px 12px;text-align:left;box-shadow:var(--shadow);min-height:56px;transition:transform .08s ease,background .12s}
+.check:hover{background:var(--accent-soft)}
+.check:active{transform:scale(.98)}
+.check .box{width:20px;height:20px;border:2px solid var(--rule-strong);border-radius:4px;flex:none;display:grid;place-items:center;font-size:13px;color:var(--accent-ink)}
+.check.done .box{background:var(--good);border-color:var(--good)}
+.check.done{background:var(--good-soft);border-color:var(--good)}
+.check .t{font-weight:600;font-size:14px;line-height:1.2}
+.check .s{font-size:11.5px;color:var(--muted);font-family:var(--font-mono)}
+.check.done .t{color:var(--muted)}
+.check .n{margin-left:auto;font-family:var(--font-mono);font-size:12px;color:var(--muted)}
+
+/* counters + taps */
+.counters{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);margin-bottom:16px}
+.counter{background:var(--surface);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-height:64px}
+.counter .n{font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
+.counter .k{font-size:11.5px;color:var(--muted);line-height:1.25}
+.taps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
+.tap{background:var(--surface);border:1px solid var(--rule-strong);border-radius:6px;padding:10px 12px 9px;text-align:left;display:flex;flex-direction:column;gap:3px;transition:transform .08s ease,background .12s;box-shadow:var(--shadow);min-height:58px}
+.tap:hover{background:var(--accent-soft)}
+.tap:active{transform:scale(.97)}
+.tap .t{font-weight:600;font-size:13.5px;line-height:1.2}
+.tap .s{font-size:11.5px;color:var(--muted);font-family:var(--font-mono)}
+.tap.flash{background:var(--good-soft);border-color:var(--good)}
+.noteform{display:flex;gap:8px;margin-bottom:8px}
+.noteform input{flex:1;min-width:0}
+
+/* ledger rows */
+.ledger{border-top:1px solid var(--rule)}
+.row{display:grid;grid-template-columns:76px 1fr auto;gap:12px;align-items:baseline;padding:7px 4px;border-bottom:1px solid var(--rule);font-size:14px}
+.row .ts{font-family:var(--font-mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.row .x{opacity:0;transition:opacity .12s}
+.row:hover .x{opacity:1}
+.row.empty{color:var(--faint);font-style:italic;grid-template-columns:1fr}
+.chip{display:inline-block;font-family:var(--font-mono);font-size:11.5px;padding:1px 6px;border-radius:3px;background:var(--sunk);color:var(--muted);margin-right:6px;vertical-align:1px;white-space:nowrap}
+.chip.boss{background:var(--warn-soft);color:var(--warn)}
+.chip.slack{background:var(--slack-soft);color:var(--slack)} .chip.email{background:var(--accent-soft);color:var(--accent)} .chip.skool{background:var(--skool-soft);color:var(--skool)} .chip.self{background:var(--sunk);color:var(--muted)}
+
+/* queue */
+.qform{display:grid;grid-template-columns:2fr 150px 130px 1fr 140px auto;gap:8px;margin-bottom:6px;align-items:center}
+.qform input[type=text]{min-width:0}
+.qform2{display:grid;grid-template-columns:1fr 150px 140px;gap:8px;margin-bottom:14px;align-items:center}
+.qtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+.qtools .spacer{flex:1}
+.qrow{display:grid;grid-template-columns:auto 1fr auto auto;gap:12px;align-items:center;padding:8px 4px;border-bottom:1px solid var(--rule)}
+.qrow .title{font-weight:500}
+.qrow .src{font-size:12.5px;color:var(--muted);margin-top:1px}
+.qrow .age{font-family:var(--font-mono);font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
+.qrow .age.old{color:var(--warn)} .qrow .age.older{color:var(--crit)}
+.qrow.done .title{text-decoration:line-through;color:var(--muted);font-weight:400}
+.qrow .cat{width:4px;align-self:stretch;border-radius:2px;background:var(--rule-strong)}
+.qrow .due{font-family:var(--font-mono);font-size:11.5px}
+.qrow .due.over{color:var(--crit);font-weight:600} .qrow .due.today{color:var(--warn);font-weight:600}
+details.closed{margin-top:14px}
+details.closed summary{cursor:pointer;color:var(--muted);font-size:13px;font-family:var(--font-display);font-weight:600;letter-spacing:.04em}
+
+/* week */
+.week{overflow-x:auto;border:1px solid var(--rule);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th{font-family:var(--font-display);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:left;padding:9px 10px;border-bottom:2px solid var(--rule-strong);background:var(--sunk);white-space:nowrap}
+td{padding:7px 10px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tr:last-child td{border-bottom:0}
+.week table{min-width:680px}
+.week td{font-family:var(--font-mono);font-variant-numeric:tabular-nums;text-align:right}
+.week td:first-child,.week th:first-child{text-align:left;font-family:var(--font-body)}
+.week th{text-align:right} .week th:first-child{text-align:left}
+.week th.today,.week td.today{background:var(--accent-soft)}
+.week td.zero{color:var(--faint)}
+.week tr.total td{border-top:2px solid var(--rule-strong);font-weight:600}
+.week tr.group td{font-family:var(--font-display);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding-top:12px;background:var(--paper)}
+.week .bar{display:inline-block;height:6px;background:var(--accent);vertical-align:middle;margin-left:6px;border-radius:1px;opacity:.7}
+
+/* settings */
+.settings{background:var(--surface);border:1px solid var(--rule);padding:14px 16px}
+.settings .rowset{display:grid;grid-template-columns:1fr 160px auto;gap:8px;align-items:center;padding:4px 0}
+.settings input[type=text]{width:100%}
+
+.ro .rw{display:none !important}
+body:not(.ro) #unlock{display:none}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:6px;font-size:13.5px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .2s;z-index:50;max-width:90vw}
+.toast.show{opacity:1}
+footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-mono);border-top:1px solid var(--rule);padding-top:12px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media (max-width:760px){
+  .qform,.qform2{grid-template-columns:1fr 1fr}
+  .row{grid-template-columns:64px 1fr auto}
+  .topbar h1{font-size:19px}
+  .settings .rowset{grid-template-columns:1fr 1fr auto}
+}
+@media (prefers-reduced-motion: reduce){ .tap,.check,.toast,.row .x{transition:none} }
+</style>
+</head><body>
+<div class="wrap">
+  <header class="topbar">
+    <div>
+      <h1>Daily Work Ledger</h1>
+      <div class="sub" id="dateline"></div>
+    </div>
+    <div class="tally" id="tally"></div>
+    <div class="status" id="status"><span class="dot"></span><span id="statusText">Loading</span><button class="btn ghost small" id="unlock" title="Enter the edit key">Unlock</button></div>
+  </header>
+
+  <section id="today">
+    <div class="sechead"><h2 id="todayTitle">Today</h2><div class="meta"><span id="todayMeta"></span><label style="display:flex;gap:6px;align-items:center">Go back to <select id="viewDay" class="btn small" disabled><option value="">Today</option></select></label><button class="btn ghost small" id="viewToday" hidden>Back to today</button></div></div>
+
+    <div class="sub-h">Standing duties — tick each pass, every tick is timestamped</div>
+    <div class="checklist" id="checklist"></div>
+
+    <div class="sub-h">Logged actions</div>
+    <div class="counters" id="counters"></div>
+    <div class="taps rw" id="taps"></div>
+    <form class="noteform rw" id="noteform">
+      <input type="text" id="noteInput" placeholder="Anything else you did — one line, logged with the time" maxlength="200" autocomplete="off">
+      <button class="btn" type="submit">Log note</button>
+    </form>
+    <div class="ledger" id="todayLog"></div>
+  </section>
+
+  <section id="queue">
+    <div class="sechead"><h2>The Queue</h2><div class="meta" id="queueMeta"></div></div>
+    <p class="hint">Everything that has landed on you and is still open — with where it came from and when. If it isn't here, it wasn't assigned.</p>
+    <form class="rw" id="qform">
+      <div class="qform">
+        <input type="text" id="qTitle" placeholder="What needs doing" maxlength="160" autocomplete="off" required>
+        <select id="qCat" title="Category"></select>
+        <select id="qSource" title="Where it came from"><option value="boss">From a boss</option><option value="slack">From Slack</option><option value="email">From email</option><option value="skool">From Skool</option><option value="self">Self-assigned</option></select>
+        <input type="text" id="qBy" placeholder="Who (boss name / sender)" maxlength="40" autocomplete="off">
+        <input type="date" id="qWhen" title="When it landed">
+        <button class="btn primary" type="submit">Add to queue</button>
+      </div>
+      <div class="qform2">
+        <input type="text" id="qClient" placeholder="Client or account it concerns (optional)" maxlength="60" autocomplete="off">
+        <input type="date" id="qDue" title="Due date (optional)">
+        <span style="font-size:12px;color:var(--muted)">← due date, optional</span>
+      </div>
+    </form>
+    <div class="qtools">
+      <select id="qFilter" class="btn small"><option value="all">All categories</option></select>
+      <select id="qSort" class="btn small"><option value="landed">Oldest first</option><option value="due">By due date</option><option value="cat">By category</option></select>
+      <div class="spacer"></div>
+      <span id="qOverflow" style="font-size:12.5px;color:var(--muted)"></span>
+    </div>
+    <div class="ledger" id="queueOpen"></div>
+    <details class="closed" id="closedWrap"><summary id="closedSummary">Closed</summary><div class="ledger" id="queueClosed"></div></details>
+  </section>
+
+  <section id="week">
+    <div class="sechead"><h2>Week</h2><div class="meta">Rolling 7 days</div></div>
+    <div class="week"><table id="weekTable"></table></div>
+  </section>
+
+  <section id="setup" class="rw">
+    <div class="sechead"><h2>Setup</h2><div class="meta">Your standing duties and categories — only you see this</div></div>
+    <div class="settings">
+      <div class="sub-h" style="margin-top:0">Standing duties (appear on the checklist every day)</div>
+      <div id="dutyRows"></div>
+      <button class="btn small" id="addDuty" style="margin-top:8px">+ Add standing duty</button>
+      <div class="sub-h">Tap-to-log actions (repeatable, counted per day)</div>
+      <div id="tapRows"></div>
+      <button class="btn small" id="addTap" style="margin-top:8px">+ Add action</button>
+    </div>
+  </section>
+
+  <footer><span id="footLeft"></span><span id="footRight"></span></footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(() => {
+'use strict';
+// ---------- categories (color-coded across queue and week) ----------
+const CATS = [
+  {id:'email', name:'Email', color:'#1E5A66'},
+  {id:'skool', name:'Skool', color:'#1F6B47'},
+  {id:'slack', name:'Slack / team', color:'#5B3B8C'},
+  {id:'sales', name:'Sales entry (sheet + CRM)', color:'#B8791E'},
+  {id:'payments', name:'Payments', color:'#B03A3A'},
+  {id:'onboarding', name:'Onboarding', color:'#2C7A4B'},
+  {id:'followup', name:'Client follow-up', color:'#3B6FB6'},
+  {id:'gbp', name:'Google Business Profile', color:'#8A5A2B'},
+  {id:'other', name:'Other', color:'#7A8480'},
+];
+const catById = Object.fromEntries(CATS.map(c => [c.id, c]));
+
+// ---------- defaults for a fresh ledger (editable in Setup) ----------
+const DEFAULT_DUTIES = [
+  {id:'em1', name:'Email — account 1', cat:'email'},
+  {id:'em2', name:'Email — account 2', cat:'email'},
+  {id:'em3', name:'Email — account 3', cat:'email'},
+  {id:'skool', name:'Skool messages answered', cat:'skool'},
+  {id:'slack', name:'Slack read (payments + new sales checked)', cat:'slack'},
+];
+const DEFAULT_TAPS = [
+  {id:'sale_sheet', name:'Sale entered in sheet', cat:'sales'},
+  {id:'sale_crm', name:'Sale entered in CRM', cat:'sales'},
+  {id:'pay_fail', name:'Failed payment handled', cat:'payments'},
+  {id:'sheet', name:'Onboarding sheet filled', cat:'onboarding'},
+  {id:'call', name:'Onboarding call taken', cat:'onboarding'},
+  {id:'followup', name:'Client followed up', cat:'followup'},
+  {id:'skool_reply', name:'Skool reply sent', cat:'skool'},
+  {id:'gbp_opt', name:'GBP optimized', cat:'gbp'},
+  {id:'gbp_add', name:'GBP added to software page', cat:'gbp'},
+];
+
+// ---------- state ----------
+let S = {v:2, settings:{duties:DEFAULT_DUTIES, taps:DEFAULT_TAPS}, log:[], queue:[]};
+function normalize(s) {
+  s = s || {};
+  s.v = 2; s.settings = s.settings || {};
+  if (!Array.isArray(s.settings.duties)) s.settings.duties = DEFAULT_DUTIES.map(d => ({...d}));
+  if (!Array.isArray(s.settings.taps)) s.settings.taps = DEFAULT_TAPS.map(d => ({...d}));
+  s.log = s.log || []; s.queue = s.queue || [];
+  // migrate v1 queue items
+  s.queue.forEach(q => { if (!q.cat) q.cat = 'other'; if (q.source === 'assigned') q.source = 'boss'; if (q.source === 'recurring') q.source = 'self'; });
+  return s;
+}
+
+const uid = () => Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
+const pad = n => String(n).padStart(2, '0');
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const fromKey = k => { const [y,m,d] = k.split('-').map(Number); return new Date(y, m-1, d); };
+const daysBetween = (aKey, bKey) => Math.round((fromKey(bKey) - fromKey(aKey)) / 86400000);
+const fmtTime = iso => { const d = new Date(iso); let h = d.getHours(), m = pad(d.getMinutes()); const ap = h >= 12 ? 'pm' : 'am'; h = h % 12 || 12; return `${h}:${m}${ap}`; };
+const fmtDateShort = k => fromKey(k).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+const fmtDateLong = d => d.toLocaleDateString(undefined, {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TODAY = dayKey();
+let VIEW_DAY = TODAY;
+
+// ---------- read-only ----------
+let readOnly = false;
+function setReadOnly(on) { readOnly = on; document.body.classList.toggle('ro', on); if (on) setStatus('ro', 'Read-only view'); }
+
+// ---------- persistence (API) ----------
+const statusEl = document.getElementById('status'), statusText = document.getElementById('statusText');
+function setStatus(cls, text) { statusEl.className = 'status ' + cls; statusText.textContent = text; }
+let dirty = false, saveTimer = null, saving = false;
+let editKey = ''; try { editKey = localStorage.getItem('ledger-edit-key') || ''; } catch (e) {}
+const headers = () => ({ 'Content-Type': 'application/json', ...(editKey ? { 'x-edit-key': editKey } : {}) });
+function markDirty() {
+  if (readOnly) return;
+  dirty = true; setStatus('saving', 'Unsaved');
+  clearTimeout(saveTimer); saveTimer = setTimeout(save, 800);
+}
+async function save() {
+  if (!dirty || saving) return;
+  saving = true; dirty = false; setStatus('saving', 'Saving…');
+  try {
+    const res = await fetch('/api/state', { method: 'PUT', headers: headers(), body: JSON.stringify(S) });
+    if (res.status === 403) { setReadOnly(true); toast('This link is read-only.'); return; }
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const j = await res.json();
+    setStatus('saved', 'Saved ' + fmtTime(j.updatedAt));
+    loadDays();
+  } catch (e) {
+    dirty = true; setStatus('error', 'Save failed — retrying'); console.error(e);
+    saveTimer = setTimeout(save, 4000);
+  } finally {
+    saving = false;
+    if (dirty && !readOnly) { clearTimeout(saveTimer); saveTimer = setTimeout(save, 800); }
+  }
+}
+window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+async function boot() {
+  try {
+    const me = await (await fetch('/api/me', { headers: headers() })).json();
+    if (!me.canEdit) {
+      const p = new URLSearchParams(location.search).get('key');
+      if (p) { editKey = p; try { localStorage.setItem('ledger-edit-key', p); } catch (e) {} history.replaceState(null, '', location.pathname); return boot(); }
+      setReadOnly(true);
+    }
+    const st = await (await fetch('/api/state')).json();
+    if (st.state) S = normalize(st.state);
+    render();
+    setStatus(readOnly ? 'ro' : 'saved', readOnly ? 'Read-only view' : (st.updatedAt ? 'Up to date · last save ' + fmtTime(st.updatedAt) : 'Up to date'));
+    loadDays();
+  } catch (e) { setStatus('error', 'Could not reach the server'); console.error(e); }
+}
+document.getElementById('unlock').addEventListener('click', () => {
+  const k = prompt('Edit key (the EDIT_KEY set on the server):'); if (!k) return;
+  editKey = k.trim(); try { localStorage.setItem('ledger-edit-key', editKey); } catch (e) {}
+  location.reload();
+});
+async function loadDays() {
+  try {
+    const j = await (await fetch('/api/days')).json();
+    const sel = document.getElementById('viewDay'); const cur = sel.value;
+    const opts = j.days.filter(d => d.day !== TODAY).map(d => `<option value="${d.day}">${fmtDateShort(d.day)} · ${d.saves} save${d.saves === 1 ? '' : 's'}</option>`).join('');
+    sel.innerHTML = `<option value="">Today</option>` + opts; sel.value = cur; sel.disabled = !opts;
+  } catch (e) {}
+}
+
+// ---------- toast ----------
+const toastEl = document.getElementById('toast'); let toastT;
+function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('show'), 1800); }
+
+// ---------- log ----------
+// entry kinds: duty (checklist pass), tap (repeatable action), note, queue (closed item, derived)
+function addLog(kind, ref, text) { S.log.push({id:uid(), ts:new Date().toISOString(), day:TODAY, kind, ref:ref || null, text:text || ''}); markDirty(); render(); }
+function removeLog(id) { S.log = S.log.filter(x => x.id !== id); markDirty(); render(); }
+const logLabel = x => {
+  if (x.kind === 'duty') return (S.settings.duties.find(d => d.id === x.ref) || {}).name || x.text || 'Standing duty';
+  if (x.kind === 'tap') return (S.settings.taps.find(d => d.id === x.ref) || {}).name || x.text || 'Action';
+  if (x.duty) return x.note || x.duty; // v1 entries
+  return x.text || x.note || '';
+};
+const logCat = x => {
+  const src = x.kind === 'duty' ? S.settings.duties : x.kind === 'tap' ? S.settings.taps : [];
+  return (src.find(d => d.id === x.ref) || {}).cat || 'other';
+};
+
+// ---------- render ----------
+function render() {
+  const viewing = VIEW_DAY !== TODAY;
+  const dayLog = S.log.filter(x => x.day === VIEW_DAY);
+  const openQ = S.queue.filter(q => !q.done);
+  const closedDay = S.queue.filter(q => q.done && q.doneDay === VIEW_DAY);
+  const landedDay = S.queue.filter(q => q.day === VIEW_DAY);
+  document.getElementById('dateline').textContent = fmtDateLong(new Date());
+  const dutiesDone = new Set(dayLog.filter(x => x.kind === 'duty').map(x => x.ref));
+  document.getElementById('tally').innerHTML = [
+    ['duties passed', `${dutiesDone.size}/${S.settings.duties.length}`],
+    ['logged today', dayLog.length],
+    ['landed today', landedDay.length],
+    ['closed today', closedDay.length],
+    ['still open', openQ.length],
+  ].map(([k, n]) => `<div><div class="n">${n}</div><div class="k">${k}</div></div>`).join('');
+  renderToday(dayLog, viewing, closedDay);
+  renderQueue(openQ);
+  renderWeek();
+  renderSetup();
+  document.getElementById('footLeft').textContent = `${S.log.length} entries on record · ${S.queue.length} queue items`;
+  const first = S.log.length ? S.log.reduce((a, b) => a.day < b.day ? a : b).day : TODAY;
+  document.getElementById('footRight').textContent = `Ledger since ${fmtDateShort(first)}`;
+}
+
+// ---------- today ----------
+function renderToday(dayLog, viewing, closedDay) {
+  document.getElementById('todayTitle').textContent = viewing ? fmtDateLong(fromKey(VIEW_DAY)) : 'Today';
+  document.getElementById('viewToday').hidden = !viewing;
+  document.getElementById('taps').style.display = viewing ? 'none' : '';
+  document.getElementById('noteform').style.display = viewing ? 'none' : '';
+  // checklist
+  document.getElementById('checklist').innerHTML = S.settings.duties.map(d => {
+    const passes = dayLog.filter(x => x.kind === 'duty' && x.ref === d.id);
+    const done = passes.length > 0;
+    const last = done ? passes[passes.length - 1].ts : null;
+    return `<button class="check ${done ? 'done' : ''}" data-duty="${d.id}" ${viewing ? 'disabled' : ''} title="${done ? 'Tick again for another pass' : 'Tick when done'}">
+      <span class="box">${done ? '✓' : ''}</span>
+      <span><div class="t">${esc(d.name)}</div><div class="s">${done ? `done ${fmtTime(last)}` : (viewing ? 'not done' : 'not yet')}</div></span>
+      ${passes.length > 1 ? `<span class="n">×${passes.length}</span>` : ''}
+    </button>`;
+  }).join('') || `<div class="hint">No standing duties yet — add them in Setup at the bottom.</div>`;
+  // counters
+  const counts = {}; S.settings.taps.forEach(t => counts[t.id] = 0); let notes = 0;
+  dayLog.forEach(x => { if (x.kind === 'tap' && counts[x.ref] !== undefined) counts[x.ref]++; else if (x.kind === 'note' || (!x.kind && !x.duty)) notes++; });
+  document.getElementById('counters').innerHTML = S.settings.taps.map(t =>
+    `<div class="counter"><div class="n">${counts[t.id]}</div><div class="k">${esc(t.name)}</div></div>`).join('') +
+    `<div class="counter"><div class="n">${notes}</div><div class="k">Notes</div></div>`;
+  document.getElementById('taps').innerHTML = S.settings.taps.map(t => `<button class="tap" data-tap="${t.id}"><span class="t">${esc(t.name)}</span><span class="s">tap to log · ${esc((catById[t.cat] || catById.other).name.toLowerCase())}</span></button>`).join('');
+  document.getElementById('todayMeta').textContent = dayLog.length ? `${dayLog.length} entr${dayLog.length === 1 ? 'y' : 'ies'} · last at ${fmtTime(dayLog[dayLog.length-1].ts)}` : (viewing ? 'Nothing was logged that day' : 'Nothing logged yet');
+  const rows = dayLog.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${x.kind === 'duty' ? 'duty' : x.kind === 'tap' ? 'action' : 'note'}</span>${esc(logLabel(x))}`, id:x.id, rm:!viewing && x.kind !== undefined}))
+    .concat(closedDay.map(q => ({ts:q.doneTs || (q.doneDay + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}${q.client ? ' <span style="color:var(--muted)">· ' + esc(q.client) + '</span>' : ''}`, id:null, rm:false})))
+    .sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
+  document.getElementById('todayLog').innerHTML = rows.length ? rows.map(r => `
+    <div class="row"><span class="ts">${fmtTime(r.ts)}</span><span>${r.html}</span>${r.rm ? `<button class="btn ghost small x rw" data-rm-log="${r.id}" title="Remove entry">×</button>` : '<span></span>'}</div>`).join('')
+    : `<div class="row empty">${viewing ? 'No entries on record for this day.' : "The day's log starts with the first tick."}</div>`;
+}
+document.getElementById('checklist').addEventListener('click', e => {
+  const b = e.target.closest('[data-duty]'); if (!b || readOnly || VIEW_DAY !== TODAY) return;
+  addLog('duty', b.dataset.duty);
+});
+document.getElementById('taps').addEventListener('click', e => {
+  const b = e.target.closest('.tap'); if (!b || readOnly) return;
+  addLog('tap', b.dataset.tap);
+  const nb = document.querySelector(`.tap[data-tap="${b.dataset.tap}"]`); if (nb) { nb.classList.add('flash'); setTimeout(() => nb.classList.remove('flash'), 350); }
+});
+document.getElementById('noteform').addEventListener('submit', e => {
+  e.preventDefault(); if (readOnly) return;
+  const inp = document.getElementById('noteInput'); const v = inp.value.trim(); if (!v) return;
+  addLog('note', null, v); inp.value = '';
+});
+document.getElementById('todayLog').addEventListener('click', e => { const b = e.target.closest('[data-rm-log]'); if (b && !readOnly) removeLog(b.dataset.rmLog); });
+document.getElementById('viewDay').addEventListener('change', e => { VIEW_DAY = e.target.value || TODAY; render(); });
+document.getElementById('viewToday').addEventListener('click', () => { VIEW_DAY = TODAY; document.getElementById('viewDay').value = ''; render(); });
+
+// ---------- queue ----------
+const SRC_LABEL = {boss:'from a boss', slack:'from Slack', email:'from email', skool:'from Skool', self:'self-assigned'};
+function ageLabel(day) { const n = daysBetween(day, TODAY); return n <= 0 ? 'landed today' : n === 1 ? 'open 1 day' : `open ${n} days`; }
+function qRow(q) {
+  const n = daysBetween(q.day, TODAY);
+  const ageCls = n >= 7 ? 'older' : n >= 3 ? 'old' : '';
+  const cat = catById[q.cat] || catById.other;
+  const who = q.by ? ` · ${esc(q.by)}` : '';
+  const src = `<span class="chip ${esc(q.source)}">${esc(SRC_LABEL[q.source] || q.source)}</span>${esc(cat.name)}${who} · landed ${fmtDateShort(q.day)}${q.ts ? ' ' + fmtTime(q.ts) : ''}${q.client ? ' · <strong>' + esc(q.client) + '</strong>' : ''}`;
+  let due = '';
+  if (q.due && !q.done) { const d = daysBetween(TODAY, q.due); due = `<div class="due ${d < 0 ? 'over' : d === 0 ? 'today' : ''}">${d < 0 ? `overdue ${-d}d` : d === 0 ? 'due today' : `due ${fmtDateShort(q.due)}`}</div>`; }
+  const right = q.done ? `closed ${fmtDateShort(q.doneDay)} ${q.doneTs ? fmtTime(q.doneTs) : ''}` : ageLabel(q.day);
+  return `<div class="qrow ${q.done ? 'done' : ''}">
+    <span class="cat" style="background:${cat.color}"></span>
+    <div><div class="title">${esc(q.title)}</div><div class="src">${src}</div></div>
+    <span class="age ${q.done ? '' : ageCls}">${right}${due}</span>
+    <span>${q.done
+      ? `<button class="btn ghost small rw" data-q-reopen="${q.id}">Reopen</button>`
+      : `<button class="btn small rw" data-q-done="${q.id}">Done</button> <button class="btn ghost small rw" data-q-rm="${q.id}" title="Remove">×</button>`}</span>
+  </div>`;
+}
+function renderQueue(openQ) {
+  const catSel = document.getElementById('qCat'); if (!catSel.childElementCount) catSel.innerHTML = CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const fSel = document.getElementById('qFilter'); if (fSel.childElementCount === 1) fSel.innerHTML += CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const filter = fSel.value, sort = document.getElementById('qSort').value;
+  let list = openQ.slice();
+  if (filter !== 'all') list = list.filter(q => q.cat === filter);
+  if (sort === 'due') list.sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || a.day.localeCompare(b.day));
+  else if (sort === 'cat') list.sort((a, b) => a.cat.localeCompare(b.cat) || a.day.localeCompare(b.day));
+  else list.sort((a, b) => a.day.localeCompare(b.day) || (a.ts || '').localeCompare(b.ts || ''));
+  const bossN = openQ.filter(q => q.source === 'boss').length, over = openQ.filter(q => q.due && q.due < TODAY).length, old = openQ.filter(q => daysBetween(q.day, TODAY) >= 3).length;
+  document.getElementById('queueMeta').textContent = `${openQ.length} open · ${bossN} from bosses · ${S.queue.filter(q => q.done && q.doneDay === TODAY).length} closed today`;
+  document.getElementById('qOverflow').textContent = openQ.length ? `${old} open 3+ days · ${over} past due` : '';
+  document.getElementById('queueOpen').innerHTML = list.length ? list.map(qRow).join('') : `<div class="row empty">${filter === 'all' ? 'Nothing open. Anything assigned goes here first.' : 'Nothing open in this category.'}</div>`;
+  const closedAll = S.queue.filter(q => q.done).sort((a, b) => (b.doneTs || '').localeCompare(a.doneTs || ''));
+  document.getElementById('closedSummary').textContent = `Closed · ${closedAll.filter(q => q.doneDay === TODAY).length} today, ${closedAll.length} on record`;
+  document.getElementById('queueClosed').innerHTML = closedAll.slice(0, 60).map(qRow).join('') || `<div class="row empty">Nothing closed yet.</div>`;
+  const w = document.getElementById('qWhen'); if (!w.value) w.value = TODAY;
+}
+document.getElementById('qFilter').addEventListener('change', () => renderQueue(S.queue.filter(q => !q.done)));
+document.getElementById('qSort').addEventListener('change', () => renderQueue(S.queue.filter(q => !q.done)));
+document.getElementById('qform').addEventListener('submit', e => {
+  e.preventDefault(); if (readOnly) return;
+  const title = document.getElementById('qTitle').value.trim(); if (!title) return;
+  const when = document.getElementById('qWhen').value || TODAY;
+  S.queue.push({id:uid(), title, cat:document.getElementById('qCat').value, source:document.getElementById('qSource').value,
+    by:document.getElementById('qBy').value.trim(), client:document.getElementById('qClient').value.trim(), due:document.getElementById('qDue').value || '',
+    day:when, ts: when === TODAY ? new Date().toISOString() : null, done:false});
+  ['qTitle','qBy','qClient','qDue'].forEach(id => document.getElementById(id).value = '');
+  markDirty(); render();
+});
+document.getElementById('queue').addEventListener('click', e => {
+  if (readOnly) return;
+  const d = e.target.closest('[data-q-done]'), r = e.target.closest('[data-q-reopen]'), x = e.target.closest('[data-q-rm]');
+  if (d) { const q = S.queue.find(q => q.id === d.dataset.qDone); if (q) { q.done = true; q.doneDay = TODAY; q.doneTs = new Date().toISOString(); } }
+  else if (r) { const q = S.queue.find(q => q.id === r.dataset.qReopen); if (q) { q.done = false; delete q.doneDay; delete q.doneTs; } }
+  else if (x) { S.queue = S.queue.filter(q => q.id !== x.dataset.qRm); }
+  else return;
+  markDirty(); render();
+});
+
+// ---------- week ----------
+function renderWeek() {
+  const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); days.push(dayKey(d)); }
+  const inWeek = k => days.includes(k);
+  const cell = (k, n, strong) => `<td class="${k === TODAY ? 'today' : ''} ${n ? '' : 'zero'}">${strong ? '<strong>' + n + '</strong>' : n}</td>`;
+  const totalCell = (arr, max) => { const t = arr.reduce((a, b) => a + b, 0); return `<td><strong>${t}</strong>${max ? `<span class="bar" style="width:${Math.round(60 * t / max)}px"></span>` : ''}</td>`; };
+  const head = `<thead><tr><th></th>${days.map(k => `<th class="${k === TODAY ? 'today' : ''}">${fromKey(k).toLocaleDateString(undefined, {weekday:'short'})}<br><span style="font-weight:400">${fmtDateShort(k)}</span></th>`).join('')}<th>7-day</th></tr></thead>`;
+  let body = '';
+  // flow: landed vs closed vs open at end of day
+  const landed = days.map(k => S.queue.filter(q => q.day === k).length);
+  const closed = days.map(k => S.queue.filter(q => q.done && q.doneDay === k).length);
+  const openEnd = days.map(k => S.queue.filter(q => q.day <= k && (!q.done || q.doneDay > k)).length);
+  body += `<tr class="group"><td colspan="9">Queue flow</td></tr>`;
+  body += `<tr><td>Landed on me</td>${days.map((k, i) => cell(k, landed[i])).join('')}${totalCell(landed)}</tr>`;
+  body += `<tr><td>Closed</td>${days.map((k, i) => cell(k, closed[i])).join('')}${totalCell(closed)}</tr>`;
+  body += `<tr class="total"><td>Still open at end of day</td>${days.map((k, i) => cell(k, openEnd[i])).join('')}<td></td></tr>`;
+  // duties: passes per day
+  body += `<tr class="group"><td colspan="9">Standing duties (passes)</td></tr>`;
+  const dutyRows = S.settings.duties.map(d => days.map(k => S.log.filter(x => x.day === k && x.kind === 'duty' && x.ref === d.id).length));
+  const dmax = Math.max(1, ...dutyRows.map(r => r.reduce((a, b) => a + b, 0)));
+  S.settings.duties.forEach((d, i) => { body += `<tr><td>${esc(d.name)}</td>${days.map((k, j) => cell(k, dutyRows[i][j])).join('')}${totalCell(dutyRows[i], dmax)}</tr>`; });
+  // actions
+  body += `<tr class="group"><td colspan="9">Logged actions</td></tr>`;
+  const tapRows = S.settings.taps.map(t => days.map(k => S.log.filter(x => x.day === k && x.kind === 'tap' && x.ref === t.id).length));
+  const tmax = Math.max(1, ...tapRows.map(r => r.reduce((a, b) => a + b, 0)));
+  S.settings.taps.forEach((t, i) => { body += `<tr><td>${esc(t.name)}</td>${days.map((k, j) => cell(k, tapRows[i][j])).join('')}${totalCell(tapRows[i], tmax)}</tr>`; });
+  const notes = days.map(k => S.log.filter(x => x.day === k && x.kind === 'note').length);
+  body += `<tr><td>Notes</td>${days.map((k, i) => cell(k, notes[i])).join('')}${totalCell(notes)}</tr>`;
+  const all = days.map(k => S.log.filter(x => x.day === k).length);
+  body += `<tr class="total"><td>Everything logged</td>${days.map((k, i) => cell(k, all[i])).join('')}${totalCell(all)}</tr>`;
+  document.getElementById('weekTable').innerHTML = head + '<tbody>' + body + '</tbody>';
+}
+
+// ---------- setup ----------
+function renderSetup() {
+  const catOpts = sel => CATS.map(c => `<option value="${c.id}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+  document.getElementById('dutyRows').innerHTML = S.settings.duties.map(d => `<div class="rowset" data-duty-id="${d.id}">
+    <input type="text" data-f="name" value="${esc(d.name)}" maxlength="60"><select data-f="cat">${catOpts(d.cat)}</select><button class="btn ghost small" data-rm-duty="${d.id}" title="Remove">×</button></div>`).join('');
+  document.getElementById('tapRows').innerHTML = S.settings.taps.map(t => `<div class="rowset" data-tap-id="${t.id}">
+    <input type="text" data-f="name" value="${esc(t.name)}" maxlength="60"><select data-f="cat">${catOpts(t.cat)}</select><button class="btn ghost small" data-rm-tap="${t.id}" title="Remove">×</button></div>`).join('');
+}
+document.getElementById('setup').addEventListener('change', e => {
+  if (readOnly) return;
+  const f = e.target.dataset.f; if (!f) return;
+  const dr = e.target.closest('[data-duty-id]'), tr = e.target.closest('[data-tap-id]');
+  const item = dr ? S.settings.duties.find(d => d.id === dr.dataset.dutyId) : tr ? S.settings.taps.find(t => t.id === tr.dataset.tapId) : null;
+  if (!item) return; item[f] = e.target.value; markDirty(); render();
+});
+document.getElementById('setup').addEventListener('click', e => {
+  if (readOnly) return;
+  const rd = e.target.closest('[data-rm-duty]'), rt = e.target.closest('[data-rm-tap]');
+  if (rd) S.settings.duties = S.settings.duties.filter(d => d.id !== rd.dataset.rmDuty);
+  else if (rt) S.settings.taps = S.settings.taps.filter(t => t.id !== rt.dataset.rmTap);
+  else return;
+  markDirty(); render();
+});
+document.getElementById('addDuty').addEventListener('click', () => { if (readOnly) return; S.settings.duties.push({id:uid(), name:'New standing duty', cat:'other'}); markDirty(); render(); const i = document.querySelector('#dutyRows .rowset:last-child input'); if (i) { i.focus(); i.select(); } });
+document.getElementById('addTap').addEventListener('click', () => { if (readOnly) return; S.settings.taps.push({id:uid(), name:'New action', cat:'other'}); markDirty(); render(); const i = document.querySelector('#tapRows .rowset:last-child input'); if (i) { i.focus(); i.select(); } });
+
+// ---------- go ----------
+render();
+boot();
+setInterval(() => { if (dayKey() !== TODAY) location.reload(); }, 60000);
+})();
+</script>
+</body></html>
