@@ -1,0 +1,20 @@
+# Continuous streaming backup of the ledger's SQLite database.
+# Every value comes from an environment variable set on the host —
+# nothing secret lives in this file, so it's safe to commit.
+#
+# Required env:  LITESTREAM_BUCKET  LITESTREAM_ACCESS_KEY_ID  LITESTREAM_SECRET_ACCESS_KEY
+# Usually also:  LITESTREAM_ENDPOINT   (any S3-compatible provider: Cloudflare R2, Backblaze B2, MinIO, Wasabi…)
+#                                       leave unset only for real AWS S3
+# Optional:      LITESTREAM_REGION  (default "auto")     LITESTREAM_PATH  (default "ledger")
+#
+# The db path must match DATA_DIR/ledger.db from server.js (DATA_DIR=/data in the Docker image).
+dbs:
+  - path: /data/ledger.db
+    replicas:
+      - type: s3
+        bucket: ${LITESTREAM_BUCKET}
+        path: ${LITESTREAM_PATH}
+        endpoint: ${LITESTREAM_ENDPOINT}
+        region: ${LITESTREAM_REGION}
+        access-key-id: ${LITESTREAM_ACCESS_KEY_ID}
+        secret-access-key: ${LITESTREAM_SECRET_ACCESS_KEY}

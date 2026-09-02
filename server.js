@@ -4,6 +4,7 @@ import express from 'express';
 import { DatabaseSync } from 'node:sqlite';
 import fs from 'node:fs';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -33,7 +34,12 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use((req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
 
-const canEdit = req => !EDIT_KEY || req.get('x-edit-key') === EDIT_KEY;
+// constant-time key comparison so a leaked link can't be brute-forced by timing
+const keyMatches = supplied => {
+  const a = Buffer.from(String(supplied || '')), b = Buffer.from(EDIT_KEY);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+};
+const canEdit = req => !EDIT_KEY || keyMatches(req.get('x-edit-key'));
 const requireEdit = (req, res, next) => canEdit(req) ? next() : res.status(403).json({ error: 'read_only', message: 'This link is read-only.' });
 
 // who am I — the page uses this to decide whether to show controls
@@ -48,8 +54,14 @@ app.put('/api/state', requireEdit, (req, res) => {
   if (!s || typeof s !== 'object' || !Array.isArray(s.log) || !Array.isArray(s.queue)) {
     return res.status(400).json({ error: 'invalid_state' });
   }
+  const current = getState();
+  // optimistic concurrency: reject a save built on a stale copy instead of clobbering a newer one (phone vs laptop)
+  const base = req.get('x-base-version');
+  if (base && current.updatedAt && base !== current.updatedAt) {
+    return res.status(409).json({ error: 'conflict', message: 'The ledger was changed on another device.', state: current.state, updatedAt: current.updatedAt });
+  }
   const now = new Date().toISOString(), day = todayKey(), json = JSON.stringify(s);
-  const prev = getState().state;
+  const prev = current.state;
   db.exec('BEGIN');
   try {
     db.prepare('INSERT INTO state (id, json, updated_at) VALUES (1, ?, ?) ON CONFLICT(id) DO UPDATE SET json = excluded.json, updated_at = excluded.updated_at').run(json, now);
@@ -66,18 +78,18 @@ app.get('/api/days', (req, res) => {
   const rows = db.prepare('SELECT day, saved_at, saves FROM snapshots ORDER BY day DESC').all();
   res.json({ days: rows.map(r => ({ day: r.day, savedAt: r.saved_at, saves: r.saves })) });
 });
-app.get('/api/days/:day', (req, res) => {
+app.get('/api/days/:day', requireEdit, (req, res) => {
   const r = db.prepare('SELECT json, saved_at, saves FROM snapshots WHERE day = ?').get(req.params.day);
   if (!r) return res.status(404).json({ error: 'no_snapshot' });
   res.json({ day: req.params.day, savedAt: r.saved_at, saves: r.saves, state: JSON.parse(r.json) });
 });
 // audit trail: every change, newest first
-app.get('/api/events', (req, res) => {
+app.get('/api/events', requireEdit, (req, res) => {
   const limit = Math.min(500, parseInt(req.query.limit, 10) || 200);
   res.json({ events: db.prepare('SELECT at, day, kind, detail FROM events ORDER BY id DESC LIMIT ?').all(limit) });
 });
-// backups: the raw database as a download
-app.get('/api/export', (req, res) => res.json({ exportedAt: new Date().toISOString(), ...getState(), snapshots: db.prepare('SELECT day, json, saved_at FROM snapshots ORDER BY day').all().map(r => ({ day: r.day, savedAt: r.saved_at, state: JSON.parse(r.json) })) }));
+// backups: the whole ledger + every snapshot as one JSON bundle (owner only — this is the "take everything" endpoint)
+app.get('/api/export', requireEdit, (req, res) => res.json({ exportedAt: new Date().toISOString(), ...getState(), snapshots: db.prepare('SELECT day, json, saved_at FROM snapshots ORDER BY day').all().map(r => ({ day: r.day, savedAt: r.saved_at, state: JSON.parse(r.json) })) }));
 
 function summarizeChange(a, b) {
   const dl = b.log.length - a.log.length, dq = b.queue.length - a.queue.length;

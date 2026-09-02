@@ -11,16 +11,43 @@ EDIT_KEY=pick-a-secret npm start      # http://localhost:3000
 Open the link, click **Unlock**, enter the key once — that browser can edit from then on.
 Anyone without the key sees the same page read-only. Bosses get the plain link.
 
-## Deploy on Railway (about 5 minutes)
+## Deploy on Railway (Hobby plan, ~$5/mo)
+The Hobby plan is what you want: services don't sleep and volumes are supported.
 1. Push this folder to a GitHub repo (or use Railway's "Deploy from local" via the CLI).
 2. Railway → New Project → Deploy from GitHub repo → pick it. It detects the Dockerfile.
 3. Variables: add `EDIT_KEY` (your secret) and `TZ=America/Denver`.
-4. Volumes: add a volume mounted at `/data` (this is where `ledger.db` lives — without it the history is wiped on redeploy).
-5. Settings → Networking → Generate Domain. That https link is the ledger.
+4. Volumes: add a volume mounted at `/data` — this is the live `ledger.db`. Without it, history is wiped on every redeploy.
+5. (Strongly recommended) Add the Litestream variables from **Continuous backups** below.
+6. Settings → Networking → Generate Domain. That https link is the ledger.
 
 ## Deploy on Render
 New → Web Service → connect the repo → Runtime: Docker. Add env vars `EDIT_KEY`, `TZ=America/Denver`,
-and a Disk mounted at `/data` (free tier has no disk; the Starter tier does). Render gives you the https link.
+a Disk mounted at `/data` (needs the Starter tier — free tier has no disk), and the Litestream vars below.
+
+## Continuous backups (Litestream)
+The volume at `/data` is a single point of failure. The image bundles [Litestream](https://litestream.io),
+which streams every write to S3-compatible object storage and restores automatically on a fresh boot
+(empty volume → pull the latest replica; existing volume → left untouched).
+
+Create a bucket on any S3-compatible provider — **Cloudflare R2** and **Backblaze B2** both have a free tier —
+then set these variables on the host:
+
+| Variable | Example | Notes |
+|---|---|---|
+| `LITESTREAM_BUCKET` | `ledger-backups` | bucket name |
+| `LITESTREAM_ACCESS_KEY_ID` | … | bucket API key id |
+| `LITESTREAM_SECRET_ACCESS_KEY` | … | bucket API secret |
+| `LITESTREAM_ENDPOINT` | `https://<acct>.r2.cloudflarestorage.com` | R2/B2/MinIO endpoint; omit for real AWS S3 |
+| `LITESTREAM_REGION` | `auto` (R2) · `us-west-004` (B2) · your AWS region | optional, defaults to `auto` |
+| `LITESTREAM_PATH` | `ledger` | optional path prefix inside the bucket, defaults to `ledger` |
+
+Leave `LITESTREAM_BUCKET` unset and the app just runs without off-host backup (fine for local Docker).
+
+**Restore by hand** (e.g. to a new host or to inspect a backup):
+```
+litestream restore -config /etc/litestream.yml /data/ledger.db     # inside the container
+```
+Belt-and-braces: `GET /api/export` (owner only) still returns the whole ledger + every snapshot as one JSON file.
 
 ## Unlocking from a new device
 Open `https://your-link/?key=YOUR_EDIT_KEY` once; the key is stored in that browser and stripped from the URL.
@@ -29,11 +56,14 @@ Open `https://your-link/?key=YOUR_EDIT_KEY` once; the key is stored in that brow
 The **Setup** section at the bottom of the page (owner only) edits the standing duties — rename the three email accounts there — and the tap-to-log actions. Changes save like everything else.
 
 ## API (all JSON)
+Public (so a boss can open the plain link read-only):
 - `GET  /api/me` — `{canEdit, today, tz}`
-- `GET  /api/state` — current ledger
-- `PUT  /api/state` — save (header `x-edit-key`); also upserts today's snapshot + an audit event
-- `GET  /api/days` — days that have a snapshot
+- `GET  /api/state` — current ledger, plus `updatedAt`
+- `GET  /api/days` — list of days that have a snapshot (date + save count only)
+
+Owner only (require header `x-edit-key`):
+- `PUT  /api/state` — save; also upserts today's snapshot + an audit event.
+  Send `x-base-version: <updatedAt you loaded>`; a mismatch returns **409** with the newer state instead of overwriting it.
 - `GET  /api/days/:day` — that day's frozen state
 - `GET  /api/events?limit=200` — audit trail, newest first
-- `GET  /api/export` — full backup as JSON
-# ledger-app
+- `GET  /api/export` — full backup (ledger + every snapshot) as one JSON file

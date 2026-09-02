@@ -360,8 +360,9 @@ function setReadOnly(on) { readOnly = on; document.body.classList.toggle('ro', o
 const statusEl = document.getElementById('status'), statusText = document.getElementById('statusText');
 function setStatus(cls, text) { statusEl.className = 'status ' + cls; statusText.textContent = text; }
 let dirty = false, saveTimer = null, saving = false;
+let baseVersion = null; // updatedAt of the state we last loaded/saved — sent back so the server can reject a stale overwrite
 let editKey = ''; try { editKey = localStorage.getItem('ledger-edit-key') || ''; } catch (e) {}
-const headers = () => ({ 'Content-Type': 'application/json', ...(editKey ? { 'x-edit-key': editKey } : {}) });
+const headers = () => ({ 'Content-Type': 'application/json', ...(editKey ? { 'x-edit-key': editKey } : {}), ...(baseVersion ? { 'x-base-version': baseVersion } : {}) });
 function markDirty() {
   if (readOnly) return;
   dirty = true; setStatus('saving', 'Unsaved');
@@ -373,8 +374,18 @@ async function save() {
   try {
     const res = await fetch('/api/state', { method: 'PUT', headers: headers(), body: JSON.stringify(S) });
     if (res.status === 403) { setReadOnly(true); toast('This link is read-only.'); return; }
+    if (res.status === 409) {
+      const j = await res.json();
+      S = normalize(j.state); baseVersion = j.updatedAt || null; dirty = false;
+      render();
+      setStatus('saved', 'Reloaded — changed on another device');
+      toast('This ledger was changed on another device — loaded the latest version.');
+      loadDays();
+      return;
+    }
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const j = await res.json();
+    baseVersion = j.updatedAt || baseVersion;
     setStatus('saved', 'Saved ' + fmtTime(j.updatedAt));
     loadDays();
   } catch (e) {
@@ -396,6 +407,7 @@ async function boot() {
     }
     const st = await (await fetch('/api/state')).json();
     if (st.state) S = normalize(st.state);
+    baseVersion = st.updatedAt || null;
     render();
     setStatus(readOnly ? 'ro' : 'saved', readOnly ? 'Read-only view' : (st.updatedAt ? 'Up to date · last save ' + fmtTime(st.updatedAt) : 'Up to date'));
     loadDays();
