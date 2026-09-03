@@ -49,6 +49,32 @@ litestream restore -config /etc/litestream.yml /data/ledger.db     # inside the 
 ```
 Belt-and-braces: `GET /api/export` (owner only) still returns the whole ledger + every snapshot as one JSON file.
 
+## Production configuration (known-good)
+Write any change here so a broken setting can be spotted by comparison instead of guesswork.
+
+| Thing | Value |
+|---|---|
+| Host | Railway, project `ledger_app`, environment `production`, Hobby plan |
+| Public domain | `ledger.cailinjustine.dev` (custom domain on the Railway service) |
+| DNS | Cloudflare: `ledger` CNAME → the `*.up.railway.app` target Railway shows for the domain (proxied) |
+| Cloudflare SSL mode | Full (strict) — Railway serves a valid cert, so strict is safe |
+| Port | app listens on `$PORT` (Railway sets `8080`); Railway domain target port = `8080` |
+| Volume | Railway volume mounted at `/data` (holds `ledger.db`) |
+| Env vars | `EDIT_KEY`, `TZ=America/Denver`, and the `LITESTREAM_*` set above |
+
+If you add or re-add the custom domain in Railway it issues a **new** `*.up.railway.app` target — update the Cloudflare CNAME to match, or the domain resolves to nothing.
+
+## Troubleshooting: the site won't load
+Work top to bottom; each step tells you which layer is at fault.
+
+1. **Is it only your machine?** Load `https://ledger.cailinjustine.dev./` — note the trailing dot after `.dev`. Browsers cache that as a separate name. If the dotted version works and the normal one doesn't, the problem is local caching, not the server:
+   - `chrome://net-internals/#dns` → *Clear host cache*; then `#sockets` → *Flush socket pools*.
+   - macOS: `sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder`
+   - Check whether a VPN or antivirus web-shield is filtering the domain.
+2. **Is the domain still wired to the app?** `curl -sSi https://ledger.cailinjustine.dev/api/me`. A body of `{"message":"Application not found"}` with header `x-railway-fallback: true` means the custom domain came unbound from the Railway service (happens after recreating/duplicating the service or editing networking). Fix: Railway → service → Settings → Networking → re-add `ledger.cailinjustine.dev`, then point the Cloudflare CNAME at the new target it shows.
+3. **Is the app itself up?** Railway → service → Deploy Logs. A healthy boot ends with `Daily Work Ledger on http://localhost:8080 (data: /data, edit key set)`. The red `ExperimentalWarning: SQLite` line is harmless — Node prints it to stderr.
+4. **Fallback that always works:** Railway → Networking → *Generate Domain* gives a `*.up.railway.app` URL bound straight to the service, no DNS involved. If that works, the app is fine and the issue is DNS/domain.
+
 ## Unlocking from a new device
 Open `https://your-link/?key=YOUR_EDIT_KEY` once; the key is stored in that browser and stripped from the URL.
 

@@ -15,5 +15,6 @@ RUN chmod +x /app/docker-entrypoint.sh
 
 ENV NODE_ENV=production
 ENV DATA_DIR=/data
-EXPOSE 3000
+# The app listens on $PORT (Railway sets it, typically 8080); 3000 only when run bare locally.
+EXPOSE 8080
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
