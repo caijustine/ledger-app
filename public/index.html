@@ -41,6 +41,7 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none !important}
 body{margin:0;background:var(--paper);border-top:4px solid transparent;border-image:var(--sunrise) 1;color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -270,14 +271,14 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 .glance{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;margin-bottom:8px}
 .glance b{color:var(--ink)}
 
-.modal-overlay{position:fixed;inset:0;background:rgba(20,22,34,.45);display:flex;align-items:flex-start;justify-content:center;padding:8vh 16px 16px;z-index:60}
-.modal{background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;box-shadow:var(--shadow);width:100%;max-width:460px;padding:16px}
-.qa-types{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
-.qa-types button{background:var(--sunk);border:1px solid transparent;border-radius:5px;padding:5px 10px;font-size:12.5px;font-family:var(--font-display);font-weight:600;color:var(--muted)}
+.qa{position:relative}
+.qa-panel{position:absolute;top:calc(100% + 6px);right:0;width:340px;max-width:86vw;background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;box-shadow:var(--shadow);z-index:45;padding:12px}
+.qa-types{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
+.qa-types button{background:var(--sunk);border:1px solid transparent;border-radius:5px;padding:4px 9px;font-size:12px;font-family:var(--font-display);font-weight:600;color:var(--muted)}
 .qa-types button.active{background:var(--accent);color:var(--accent-ink)}
-#qaFields{display:flex;flex-direction:column;gap:8px}
-#qaFields input,#qaFields select,#qaFields textarea{width:100%}
-.qa-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+#qaFields{display:flex;flex-direction:column;gap:7px}
+.qa-panel input,.qa-panel select,.qa-panel textarea{width:100%;background:var(--surface);border:1px solid var(--rule-strong);border-radius:4px;padding:7px 9px;font-size:13px;color:var(--ink)}
+.qa-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 
 @media (max-width:760px){
   .stats{grid-template-columns:repeat(2,1fr)}
@@ -296,7 +297,23 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
     </div>
     <div class="tools">
       <div class="search"><input type="text" id="gsearch" placeholder="Search…" autocomplete="off" spellcheck="false"><div class="results" id="gresults" hidden></div></div>
-      <button class="btn primary small rw" id="quickAdd" title="Quick add">+ Add</button>
+      <div class="qa">
+        <button class="btn primary small rw" id="quickAdd" title="Quick add" aria-expanded="false">+ Add</button>
+        <div class="qa-panel" id="qaPanel" hidden>
+          <div class="qa-types" id="qaTypes">
+            <button data-qa="task" class="active" type="button">Task</button>
+            <button data-qa="request" type="button">Request</button>
+            <button data-qa="activity" type="button">Activity</button>
+            <button data-qa="note" type="button">Note</button>
+            <button data-qa="waiting" type="button">Waiting</button>
+            <button data-qa="client" type="button">Client</button>
+          </div>
+          <form id="qaForm">
+            <div id="qaFields"></div>
+            <div class="qa-actions"><button type="button" class="btn ghost small" id="qaCancel">Close</button><button type="submit" class="btn primary small">Add</button></div>
+          </form>
+        </div>
+      </div>
       <button class="btn ghost small rw" id="gear" title="Standing duties &amp; actions">⚙</button>
       <div class="status" id="status"><span class="dot"></span><span id="statusText">Loading</span><button class="btn ghost small" id="unlock" title="Enter the edit key">Unlock</button></div>
     </div>
@@ -441,22 +458,6 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 </div>
 <div class="toast" id="toast"></div>
 <datalist id="clientNames"></datalist>
-<div class="modal-overlay" id="qaOverlay" hidden>
-  <div class="modal" role="dialog" aria-modal="true" aria-label="Quick add">
-    <div class="qa-types" id="qaTypes">
-      <button data-qa="task" class="active" type="button">Task</button>
-      <button data-qa="request" type="button">Request</button>
-      <button data-qa="activity" type="button">Activity</button>
-      <button data-qa="note" type="button">Note</button>
-      <button data-qa="waiting" type="button">Waiting</button>
-      <button data-qa="client" type="button">Client</button>
-    </div>
-    <form id="qaForm">
-      <div id="qaFields"></div>
-      <div class="qa-actions"><button type="button" class="btn ghost" id="qaCancel">Cancel</button><button type="submit" class="btn primary">Add</button></div>
-    </form>
-  </div>
-</div>
 
 <script>
 (() => {
@@ -1311,18 +1312,21 @@ function renderGlance() {
     `<span><b>${or}</b> open requests</span><span><b>${ow}</b> waiting</span>`;
 }
 
-// ---------- quick add ----------
+// ---------- quick add (inline panel under "+ Add") ----------
 let QA_TYPE = 'task';
-const qaOverlay = document.getElementById('qaOverlay');
+const qaPanel = document.getElementById('qaPanel'), quickAddBtn = document.getElementById('quickAdd');
+function qaSyncTypes() { document.querySelectorAll('#qaTypes button').forEach(b => b.classList.toggle('active', b.dataset.qa === QA_TYPE)); }
 function qaOpen(type) {
   if (readOnly) return;
-  QA_TYPE = type || 'task';
-  qaOverlay.hidden = false;
-  qaOverlay.querySelectorAll('.qa-types button').forEach(b => b.classList.toggle('active', b.dataset.qa === QA_TYPE));
+  if (type) QA_TYPE = type;
+  qaPanel.hidden = false;
+  quickAddBtn.setAttribute('aria-expanded', 'true');
+  qaSyncTypes();
   qaFields();
-  const f = qaOverlay.querySelector('#qaFields input, #qaFields select'); if (f) f.focus();
+  const f = qaPanel.querySelector('#qaFields input, #qaFields select'); if (f) f.focus();
 }
-function qaClose() { qaOverlay.hidden = true; document.getElementById('qaForm').reset(); }
+function qaClose() { qaPanel.hidden = true; quickAddBtn.setAttribute('aria-expanded', 'false'); document.getElementById('qaForm').reset(); }
+function qaToggle() { qaPanel.hidden ? qaOpen() : qaClose(); }
 function qaFields() {
   const dl = 'list="clientNames"', cat = sel => CATS.map(c => `<option value="${c.id}"${c.id === sel ? ' selected' : ''}>${esc(c.name)}</option>`).join('');
   const F = {
@@ -1350,14 +1354,13 @@ function qaFields() {
 }
 document.getElementById('qaTypes').addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  QA_TYPE = b.dataset.qa;
-  qaOverlay.querySelectorAll('.qa-types button').forEach(x => x.classList.toggle('active', x === b));
-  qaFields();
+  QA_TYPE = b.dataset.qa; qaSyncTypes(); qaFields();
+  const f = qaPanel.querySelector('#qaFields input, #qaFields select'); if (f) f.focus();
 });
 document.getElementById('qaCancel').addEventListener('click', qaClose);
-qaOverlay.addEventListener('click', e => { if (e.target === qaOverlay) qaClose(); });
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !qaOverlay.hidden) qaClose(); });
-document.getElementById('quickAdd').addEventListener('click', () => qaOpen('task'));
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !qaPanel.hidden) qaClose(); });
+quickAddBtn.addEventListener('click', qaToggle);
+document.addEventListener('click', e => { if (!qaPanel.hidden && !e.target.closest('.qa, #addClientBtn')) qaClose(); });
 document.getElementById('qaForm').addEventListener('submit', e => {
   e.preventDefault(); if (readOnly) return;
   const fd = new FormData(e.target), g = k => (fd.get(k) || '').toString().trim(), now = new Date().toISOString();
@@ -1379,7 +1382,10 @@ document.getElementById('qaForm').addEventListener('submit', e => {
     const c = newClient({name:n, business:g('business'), status:g('status')});
     S.clients.push(c); markDirty(); render(); qaClose(); openClient(c.id); toast('Client added'); return;
   }
-  markDirty(); render(); qaClose(); toast('Added');
+  markDirty(); render();
+  e.target.reset(); qaFields();                       // keep the panel open for the next add
+  const f = qaPanel.querySelector('#qaFields input, #qaFields select'); if (f) f.focus();
+  toast('Added');
 });
 
 // ---------- global search ----------
