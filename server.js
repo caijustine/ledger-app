@@ -22,7 +22,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS events    (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, detail TEXT NOT NULL);
 `);
 
-const EMPTY = { v: 2, settings: {}, log: [], queue: [] };
+const EMPTY = { v: 3, settings: {}, log: [], queue: [], clients: [], waiting: [] };
 const todayKey = () => {
   const p = new Intl.DateTimeFormat('en-CA', { timeZone: TZ, year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
   const g = t => p.find(x => x.type === t).value;
@@ -51,7 +51,9 @@ app.get('/api/state', (req, res) => res.json(getState()));
 // save the whole state; also freezes today's snapshot and appends an audit event
 app.put('/api/state', requireEdit, (req, res) => {
   const s = req.body;
-  if (!s || typeof s !== 'object' || !Array.isArray(s.log) || !Array.isArray(s.queue)) {
+  if (!s || typeof s !== 'object' || !Array.isArray(s.log) || !Array.isArray(s.queue)
+      || (s.clients !== undefined && !Array.isArray(s.clients))
+      || (s.waiting !== undefined && !Array.isArray(s.waiting))) {
     return res.status(400).json({ error: 'invalid_state' });
   }
   const current = getState();
@@ -101,6 +103,38 @@ function summarizeChange(a, b) {
   if (closedB > closedA) { const q = b.queue.find(q => q.done && !a.queue.find(p => p.id === q.id && p.done)); return { kind: 'queue', text: `closed "${q ? q.title : 'item'}"` }; }
   if (closedB < closedA) return { kind: 'queue', text: 'reopened a queue item' };
   if (JSON.stringify(a.queue) !== JSON.stringify(b.queue)) return { kind: 'queue', text: 'edited a queue item' };
+
+  // clients
+  const ac = a.clients || [], bc = b.clients || [];
+  if (bc.length > ac.length) { const c = bc[bc.length - 1]; return { kind: 'client', text: `added client ${c.name || 'unnamed'}${c.business ? ' (' + c.business + ')' : ''}` }; }
+  if (bc.length < ac.length) return { kind: 'client', text: `removed ${ac.length - bc.length} client(s)` };
+  const archA = ac.filter(c => c.status === 'archived').length, archB = bc.filter(c => c.status === 'archived').length;
+  if (archB > archA) { const c = bc.find(c => c.status === 'archived' && !ac.find(p => p.id === c.id && p.status === 'archived')); return { kind: 'client', text: `archived "${c ? c.name : 'client'}"` }; }
+  const obDone = list => list.reduce((n, c) => n + (c.onboarding || []).filter(o => o.done).length, 0);
+  const oa = obDone(ac), ob = obDone(bc);
+  if (ob > oa) {
+    for (const c of bc) {
+      const pc = ac.find(p => p.id === c.id); if (!pc) continue;
+      const step = (c.onboarding || []).find(o => o.done && !(pc.onboarding || []).find(p => p.key === o.key && p.done));
+      if (step) return { kind: 'client', text: `${c.name}: onboarding — ${step.label}` };
+    }
+  }
+  if (ob < oa) return { kind: 'client', text: 'unchecked an onboarding step' };
+  for (const c of bc) {
+    const pc = ac.find(p => p.id === c.id); if (!pc) continue;
+    const was = (pc.nextAction || '').trim(), now = (c.nextAction || '').trim();
+    if (now && now !== was) return { kind: 'client', text: `${c.name}: next action — ${now}` };
+    if (!now && was) return { kind: 'client', text: `${c.name}: cleared next action` };
+  }
+
+  // waiting
+  const aw = a.waiting || [], bw = b.waiting || [];
+  if (bw.length > aw.length) { const w = bw[bw.length - 1]; return { kind: 'waiting', text: `waiting on ${w.on || '?'}: ${w.what || ''}`.trim() }; }
+  if (bw.length < aw.length) return { kind: 'waiting', text: `removed ${aw.length - bw.length} waiting item(s)` };
+  const wDoneA = aw.filter(w => w.status === 'done').length, wDoneB = bw.filter(w => w.status === 'done').length;
+  if (wDoneB > wDoneA) { const w = bw.find(w => w.status === 'done' && !aw.find(p => p.id === w.id && p.status === 'done')); return { kind: 'waiting', text: `resolved waiting: ${w ? w.what : 'item'}` }; }
+  if (wDoneB < wDoneA) return { kind: 'waiting', text: 'reopened a waiting item' };
+
   if (JSON.stringify(a.settings) !== JSON.stringify(b.settings)) return { kind: 'settings', text: 'changed duties or actions' };
   return null;
 }

@@ -188,6 +188,104 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
   .settings .rowset{grid-template-columns:1fr 1fr auto}
 }
 @media (prefers-reduced-motion: reduce){ .tap,.check,.toast,.row .x{transition:none} }
+
+/* ---------- command center ---------- */
+.topbar .tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.search{position:relative}
+.search input{width:160px;background:var(--surface);border:1px solid var(--rule-strong);border-radius:4px;padding:7px 10px;font-size:13px}
+.search .results{position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--rule-strong);border-radius:6px;box-shadow:var(--shadow);z-index:40;max-height:340px;overflow:auto;min-width:280px}
+.search .results button{display:block;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:8px 10px;font-size:13px;color:var(--ink)}
+.search .results button:last-child{border-bottom:0}
+.search .results button:hover{background:var(--accent-soft)}
+.search .results .rt{font-family:var(--font-mono);font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-right:8px}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:22px 0 4px}
+.stat{background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;padding:13px 12px;text-align:left;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:3px}
+.stat .n{font-family:var(--font-display);font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.stat .k{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-family:var(--font-display);font-weight:600}
+.stat.crit .n{color:var(--crit)} .stat.warn .n{color:var(--warn)} .stat.accent .n{color:var(--accent)} .stat.good .n{color:var(--good)}
+.stat:hover{background:var(--accent-soft)}
+
+.block{margin-top:32px}
+.sechead.sm{border-bottom-width:1px;margin-bottom:10px}
+.sechead.sm h3{font-family:var(--font-display);font-size:14px;font-weight:600}
+.row.prio{grid-template-columns:74px 1fr 16px;cursor:pointer}
+.row.prio:hover{background:var(--accent-soft)}
+.row.prio .ts{text-transform:uppercase;font-size:11px;letter-spacing:.04em}
+.row.prio.over .ts{color:var(--crit)}
+.chev{color:var(--faint)}
+
+.noticed:not(:empty){margin-top:18px}
+.noticed-inner{background:var(--accent-soft);border:1px solid var(--rule-strong);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px}
+.noticed .nlabel{font-family:var(--font-display);font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.noticed ul{margin:6px 0 0;padding-left:18px;font-size:13.5px}
+.noticed li{margin:2px 0}
+
+details.daily{margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--surface)}
+details.daily>summary{cursor:pointer;padding:12px 16px;font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--ink);list-style:none}
+details.daily>summary::-webkit-details-marker{display:none}
+details.daily>summary::before{content:"\25B8";color:var(--muted);margin-right:8px}
+details.daily[open]>summary::before{content:"\25BE"}
+details.daily>summary:hover{background:var(--sunk)}
+details.daily .daily-body{padding:2px 16px 16px;border-top:1px solid var(--rule)}
+
+.ctag{font-family:var(--font-mono);font-size:11px;padding:1px 6px;border-radius:3px;background:var(--accent-soft);color:var(--accent);border:0;cursor:pointer;vertical-align:1px}
+.ctag:hover{filter:brightness(.96)}
+
+.clienttools{display:flex;gap:8px;margin:8px 0 12px;flex-wrap:wrap}
+.clienttools input[type=text]{flex:1;min-width:150px}
+.clientlist{border-top:1px solid var(--rule)}
+.crow{display:grid;grid-template-columns:1.3fr 1.3fr 16px 1.6fr 84px;gap:12px;align-items:center;width:100%;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--rule);padding:11px 4px;font-size:14px;color:var(--ink)}
+.crow:hover{background:var(--accent-soft)}
+.crow .cname{font-weight:600}
+.crow .cbiz{color:var(--muted);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.crow .cnext{font-size:13px}
+.crow .cnext.miss{color:var(--warn);font-style:italic}
+.crow .clast{font-size:12px;color:var(--muted);text-align:right}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--faint);display:inline-block;flex:none}
+.dot.green{background:var(--good)} .dot.yellow{background:var(--warn)} .dot.red{background:var(--crit)} .dot.neutral{background:var(--faint)}
+
+#client .cp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin:4px 0}
+#client .cp-head h2{font-size:20px}
+#client .cp-head .sub{color:var(--muted);font-size:13px}
+.cp-head-tools{display:flex;align-items:center;gap:10px}
+.cp-reasons{font-size:12.5px;color:var(--crit);font-family:var(--font-mono);margin-bottom:6px}
+.cp-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.cp-card{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;margin-top:14px}
+.cp-grid .cp-card{margin-top:14px}
+.cp-card>.sub-h:first-child{margin-top:0}
+.cp-card input[type=text],.cp-card input[type=date],.cp-card textarea{width:100%;margin-top:6px}
+.cp-card>label{display:block;font-size:12px;color:var(--muted);margin-top:8px}
+.progress{height:6px;background:var(--sunk);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress span{display:block;height:100%;background:var(--good)}
+details.ob{margin-top:8px}
+details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:var(--font-display);color:var(--muted)}
+.oblist{margin-top:8px}
+.oblist label{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink);padding:3px 0;margin:0}
+.oblist input{width:auto;margin:0}
+.linkrow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px;padding:4px 0;border-bottom:1px solid var(--rule)}
+.cp-add{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
+.cp-add input[type=text]{flex:1;min-width:120px;margin:0}
+
+.glance{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;margin-bottom:8px}
+.glance b{color:var(--ink)}
+
+.modal-overlay{position:fixed;inset:0;background:rgba(20,22,34,.45);display:flex;align-items:flex-start;justify-content:center;padding:8vh 16px 16px;z-index:60}
+.modal{background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;box-shadow:var(--shadow);width:100%;max-width:460px;padding:16px}
+.qa-types{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:12px}
+.qa-types button{background:var(--sunk);border:1px solid transparent;border-radius:5px;padding:5px 10px;font-size:12.5px;font-family:var(--font-display);font-weight:600;color:var(--muted)}
+.qa-types button.active{background:var(--accent);color:var(--accent-ink)}
+#qaFields{display:flex;flex-direction:column;gap:8px}
+#qaFields input,#qaFields select,#qaFields textarea{width:100%}
+.qa-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+
+@media (max-width:760px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .cp-grid{grid-template-columns:1fr}
+  .crow{grid-template-columns:1fr 14px 66px;grid-template-areas:"name health last" "biz biz biz" "next next next";row-gap:3px}
+  .crow .cname{grid-area:name}.crow .cbiz{grid-area:biz}.crow .dot{grid-area:health}.crow .cnext{grid-area:next}.crow .clast{grid-area:last}
+  .search input{width:120px}
+}
 </style>
 </head><body>
 <div class="wrap">
@@ -196,32 +294,67 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
       <h1>Daily Work Ledger</h1>
       <div class="sub" id="dateline"></div>
     </div>
-    <div class="tally" id="tally"></div>
-    <div class="status" id="status"><span class="dot"></span><span id="statusText">Loading</span><button class="btn ghost small" id="unlock" title="Enter the edit key">Unlock</button></div>
+    <div class="tools">
+      <div class="search"><input type="text" id="gsearch" placeholder="Search…" autocomplete="off" spellcheck="false"><div class="results" id="gresults" hidden></div></div>
+      <button class="btn primary small rw" id="quickAdd" title="Quick add">+ Add</button>
+      <button class="btn ghost small rw" id="gear" title="Standing duties &amp; actions">⚙</button>
+      <div class="status" id="status"><span class="dot"></span><span id="statusText">Loading</span><button class="btn ghost small" id="unlock" title="Enter the edit key">Unlock</button></div>
+    </div>
   </header>
 
   <nav class="tabs" id="tabs">
     <button class="tab active" data-go="today">Today</button>
+    <button class="tab" data-go="clients">Clients<span class="cnt" id="tabClientsN"></span></button>
     <button class="tab" data-go="queue">Queue<span class="cnt" id="tabQueueN"></span></button>
-    <button class="tab" data-go="history">Previous days<span class="cnt" id="tabHistN"></span></button>
-    <button class="tab" data-go="week">Week</button>
-    <button class="tab rw" data-go="setup">Setup</button>
+    <button class="tab" data-go="reports">Reports</button>
   </nav>
 
   <section id="today" data-tab="today" class="active">
-    <div class="sechead"><h2 id="todayTitle">Today</h2><div class="meta"><span id="todayMeta"></span></div></div>
+    <div class="stats" id="stats"></div>
+    <div class="block">
+      <div class="sechead"><h2>Today’s Priorities</h2><div class="meta" id="prioMeta"></div></div>
+      <div class="ledger" id="priorities"></div>
+    </div>
+    <div class="noticed" id="noticed"></div>
+    <details class="daily" id="dailyWrap">
+      <summary id="dailySummary">Daily checklist</summary>
+      <div class="daily-body">
+        <div class="sub-h">Standing duties — tick each pass, every tick is timestamped</div>
+        <div class="checklist" id="checklist"></div>
+        <div class="sub-h">Logged actions</div>
+        <div class="counters" id="counters"></div>
+        <div class="taps rw" id="taps"></div>
+        <form class="noteform rw" id="noteform">
+          <input type="text" id="noteInput" placeholder="Anything else you did — one line, logged with the time" maxlength="200" autocomplete="off">
+          <button class="btn" type="submit">Log note</button>
+        </form>
+        <div class="ledger" id="todayLog"></div>
+      </div>
+    </details>
+    <div class="block">
+      <div class="sechead"><h2>Recent activity</h2><div class="meta"></div></div>
+      <div class="ledger" id="recent"></div>
+    </div>
+  </section>
 
-    <div class="sub-h">Standing duties — tick each pass, every tick is timestamped</div>
-    <div class="checklist" id="checklist"></div>
+  <section id="clients" data-tab="clients">
+    <div class="sechead"><h2>Clients</h2><div class="meta" id="clientsMeta"></div></div>
+    <div class="clienttools">
+      <input type="text" id="clientSearch" placeholder="Search name or business" autocomplete="off" spellcheck="false">
+      <select id="clientStatusFilter" class="btn small">
+        <option value="active">Active</option>
+        <option value="onboarding">Onboarding</option>
+        <option value="all">All</option>
+        <option value="archived">Archived</option>
+      </select>
+      <button class="btn small rw" id="addClientBtn">+ Client</button>
+    </div>
+    <div class="clientlist" id="clientList"></div>
+  </section>
 
-    <div class="sub-h">Logged actions</div>
-    <div class="counters" id="counters"></div>
-    <div class="taps rw" id="taps"></div>
-    <form class="noteform rw" id="noteform">
-      <input type="text" id="noteInput" placeholder="Anything else you did — one line, logged with the time" maxlength="200" autocomplete="off">
-      <button class="btn" type="submit">Log note</button>
-    </form>
-    <div class="ledger" id="todayLog"></div>
+  <section id="client" data-tab="client">
+    <button class="btn ghost small" id="clientBack" style="margin-bottom:10px">← Clients</button>
+    <div id="clientBody"></div>
   </section>
 
   <section id="queue" data-tab="queue">
@@ -231,19 +364,19 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
       <div class="qform">
         <input type="text" id="qTitle" placeholder="What needs doing" maxlength="160" autocomplete="off" required>
         <select id="qCat" title="Category"></select>
-        <select id="qSource" title="Where it came from"><option value="boss">From a boss</option><option value="slack">From Slack</option><option value="email">From email</option><option value="skool">From Skool</option><option value="self">Self-assigned</option></select>
+        <select id="qSource" title="Where it came from"><option value="boss">From a boss</option><option value="slack">From Slack</option><option value="email">From email</option><option value="skool">From Skool</option><option value="client">Client request</option><option value="self">Self-assigned</option></select>
         <input type="text" id="qBy" placeholder="Who (boss name / sender)" maxlength="40" autocomplete="off">
         <input type="date" id="qWhen" title="When it landed">
         <button class="btn primary" type="submit">Add to queue</button>
       </div>
       <div class="qform2">
-        <input type="text" id="qClient" placeholder="Client or account it concerns (optional)" maxlength="60" autocomplete="off">
+        <input type="text" id="qClient" list="clientNames" placeholder="Client it concerns (optional)" maxlength="60" autocomplete="off">
         <input type="date" id="qDue" title="Due date (optional)">
         <span style="font-size:12px;color:var(--muted)">← due date, optional</span>
       </div>
     </form>
     <div class="qtools">
-      <select id="qFilter" class="btn small"><option value="all">All categories</option></select>
+      <select id="qFilter" class="btn small"><option value="all">All categories</option><option value="__req">Requests only</option></select>
       <select id="qSort" class="btn small"><option value="newest">Newest first</option><option value="landed">Oldest first</option><option value="due">By due date</option><option value="cat">By category</option></select>
       <div class="spacer"></div>
       <span id="qOverflow" style="font-size:12.5px;color:var(--muted)"></span>
@@ -252,8 +385,13 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
     <details class="closed" id="closedWrap"><summary id="closedSummary">Closed</summary><div class="ledger" id="queueClosed"></div></details>
   </section>
 
-  <section id="history" data-tab="history">
-    <div class="sechead"><h2>Previous days</h2><div class="meta" id="histMeta"></div></div>
+  <section id="reports" data-tab="reports">
+    <div class="sechead"><h2>Reports</h2><div class="meta">Rolling 7 days · client health</div></div>
+    <div class="glance" id="glance"></div>
+    <div class="sub-h">Week</div>
+    <div class="week"><table id="weekTable"></table></div>
+    <div class="sub-h">Previous days</div>
+    <div class="hint" id="histMeta"></div>
     <div id="histList" class="days"></div>
     <div id="histDay" hidden>
       <button class="btn ghost small" id="histBack" style="margin-bottom:10px">← All days</button>
@@ -267,13 +405,28 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
     </div>
   </section>
 
-  <section id="week" data-tab="week">
-    <div class="sechead"><h2>Week</h2><div class="meta">Rolling 7 days</div></div>
-    <div class="week"><table id="weekTable"></table></div>
+  <section id="waiting" data-tab="waiting">
+    <button class="btn ghost small" id="waitBack" style="margin-bottom:10px">← Back</button>
+    <div class="sechead"><h2>Waiting On</h2><div class="meta" id="waitMeta"></div></div>
+    <p class="hint">Anything blocked on someone else. A “call” due today counts toward the Calls number on Today.</p>
+    <form class="rw" id="waitForm">
+      <div class="qform">
+        <input type="text" id="wWhat" placeholder="What are we waiting for" maxlength="160" autocomplete="off" required>
+        <input type="text" id="wClient" list="clientNames" placeholder="Client (optional)" maxlength="60" autocomplete="off">
+        <select id="wOn" title="Waiting on"><option value="me">Me</option><option value="client">Client</option><option value="tech">Tech</option><option value="boss">Boss</option><option value="other">Other</option></select>
+        <select id="wType" title="Type"><option value="item">Item</option><option value="call">Call</option></select>
+        <input type="date" id="wReq" title="Requested">
+        <input type="date" id="wDue" title="Due">
+        <button class="btn primary" type="submit">Add</button>
+      </div>
+    </form>
+    <div class="ledger" id="waitOpen"></div>
+    <details class="closed" id="waitClosedWrap"><summary id="waitClosedSum">Resolved</summary><div class="ledger" id="waitClosed"></div></details>
   </section>
 
   <section id="setup" data-tab="setup" class="rw">
-    <div class="sechead"><h2>Setup</h2><div class="meta">Your standing duties and categories — only you see this</div></div>
+    <button class="btn ghost small" id="setupBack" style="margin-bottom:10px">← Back</button>
+    <div class="sechead"><h2>Setup</h2><div class="meta">Your standing duties and actions — only you see this</div></div>
     <div class="settings">
       <div class="sub-h" style="margin-top:0">Standing duties (appear on the checklist every day)</div>
       <div id="dutyRows"></div>
@@ -287,6 +440,23 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
   <footer><span id="footLeft"></span><span id="footRight"></span></footer>
 </div>
 <div class="toast" id="toast"></div>
+<datalist id="clientNames"></datalist>
+<div class="modal-overlay" id="qaOverlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-label="Quick add">
+    <div class="qa-types" id="qaTypes">
+      <button data-qa="task" class="active" type="button">Task</button>
+      <button data-qa="request" type="button">Request</button>
+      <button data-qa="activity" type="button">Activity</button>
+      <button data-qa="note" type="button">Note</button>
+      <button data-qa="waiting" type="button">Waiting</button>
+      <button data-qa="client" type="button">Client</button>
+    </div>
+    <form id="qaForm">
+      <div id="qaFields"></div>
+      <div class="qa-actions"><button type="button" class="btn ghost" id="qaCancel">Cancel</button><button type="submit" class="btn primary">Add</button></div>
+    </form>
+  </div>
+</div>
 
 <script>
 (() => {
@@ -325,19 +495,79 @@ const DEFAULT_TAPS = [
   {id:'gbp_add', name:'GBP added to software page', cat:'gbp'},
 ];
 
+// ---------- client operations ----------
+const CLIENT_STATUS = ['onboarding', 'active', 'paused', 'archived'];
+const WAIT_ON = [
+  {id:'me', name:'Me'}, {id:'client', name:'Client'}, {id:'tech', name:'Tech'},
+  {id:'boss', name:'Boss'}, {id:'other', name:'Other'},
+];
+const ONBOARDING_TEMPLATE = [
+  ['info', 'Client information entered'],
+  ['gbp_access', 'GBP access confirmed'],
+  ['gbp_sched', 'GBP onboarding scheduled'],
+  ['gbp_done', 'GBP onboarding completed'],
+  ['site_start', 'Website started'],
+  ['domain', 'Domain information received'],
+  ['social', 'Social accounts connected'],
+  ['photo_link', 'Photo/video upload link sent'],
+  ['nfc_addr', 'NFC card address confirmed'],
+  ['nfc_order', 'NFC card ordered'],
+  ['skool', 'Skool invite sent'],
+  ['reviews', 'Review strategy explained'],
+  ['walk_sched', 'Website walkthrough scheduled'],
+  ['site_done', 'Website completed'],
+  ['final', 'Final walkthrough completed'],
+].map(([key, label]) => ({key, label}));
+
 // ---------- state ----------
-let S = {v:2, settings:{duties:DEFAULT_DUTIES, taps:DEFAULT_TAPS}, log:[], queue:[]};
+let S = {v:3, settings:{duties:DEFAULT_DUTIES, taps:DEFAULT_TAPS}, log:[], queue:[], clients:[], waiting:[]};
 function normalize(s) {
   s = s || {};
-  s.v = 2; s.settings = s.settings || {};
+  s.v = 3; s.settings = s.settings || {};
   if (!Array.isArray(s.settings.duties)) s.settings.duties = DEFAULT_DUTIES.map(d => ({...d}));
   if (!Array.isArray(s.settings.taps)) s.settings.taps = DEFAULT_TAPS.map(d => ({...d}));
   s.log = s.log || []; s.queue = s.queue || [];
+  s.clients = Array.isArray(s.clients) ? s.clients : [];
+  s.waiting = Array.isArray(s.waiting) ? s.waiting : [];
   // rename the placeholder email duties if they were never customized
   const OLD = {em1:'Email — account 1', em2:'Email — account 2', em3:'Email — account 3'};
   s.settings.duties.forEach(d => { if (OLD[d.id] && d.name === OLD[d.id]) d.name = DEFAULT_DUTIES.find(x => x.id === d.id).name; });
   // migrate v1 queue items
-  s.queue.forEach(q => { if (!q.cat) q.cat = 'other'; if (q.source === 'assigned') q.source = 'boss'; if (q.source === 'recurring') q.source = 'self'; });
+  s.queue.forEach(q => { if (!q.cat) q.cat = 'other'; if (q.source === 'assigned') q.source = 'boss'; if (q.source === 'recurring') q.source = 'self'; if (!('clientId' in q)) q.clientId = null; });
+  // clients
+  s.clients.forEach(c => {
+    c.id = c.id || uid();
+    c.name = c.name || ''; c.business = c.business || '';
+    c.status = CLIENT_STATUS.includes(c.status) ? c.status : 'active';
+    c.contact = c.contact && typeof c.contact === 'object' ? c.contact : {name:'', email:'', phone:''};
+    ['name', 'email', 'phone'].forEach(k => { if (typeof c.contact[k] !== 'string') c.contact[k] = ''; });
+    c.links = Array.isArray(c.links) ? c.links.filter(l => l && l.url) : [];
+    if (typeof c.notes !== 'string') c.notes = '';
+    if (typeof c.nextAction !== 'string') c.nextAction = '';
+    c.nextActionDue = c.nextActionDue || '';
+    c.nextFollowUp = c.nextFollowUp || '';
+    c.createdAt = c.createdAt || new Date().toISOString();
+    if (!('archivedAt' in c)) c.archivedAt = null;
+    const have = Array.isArray(c.onboarding) ? c.onboarding : [];
+    c.onboarding = ONBOARDING_TEMPLATE.map(t => {
+      const ex = have.find(o => o && o.key === t.key);
+      return {key:t.key, label:t.label, done: !!(ex && ex.done), doneAt: (ex && ex.doneAt) || null};
+    });
+  });
+  // waiting
+  s.waiting.forEach(w => {
+    w.id = w.id || uid();
+    w.what = w.what || '';
+    w.on = WAIT_ON.some(o => o.id === w.on) ? w.on : 'other';
+    w.type = w.type === 'call' ? 'call' : 'item';
+    w.status = w.status === 'done' ? 'done' : 'open';
+    w.clientId = w.clientId || null;
+    w.requestedDate = w.requestedDate || '';
+    w.due = w.due || '';
+    if (typeof w.notes !== 'string') w.notes = '';
+    w.createdAt = w.createdAt || new Date().toISOString();
+    if (!('doneAt' in w)) w.doneAt = null;
+  });
   return s;
 }
 
@@ -428,43 +658,170 @@ const toastEl = document.getElementById('toast'); let toastT;
 function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('show'), 1800); }
 
 // ---------- log ----------
-// entry kinds: duty (checklist pass), tap (repeatable action), note, queue (closed item, derived)
-function addLog(kind, ref, text) { S.log.push({id:uid(), ts:new Date().toISOString(), day:TODAY, kind, ref:ref || null, text:text || ''}); markDirty(); render(); }
+// entry kinds: duty (checklist pass), tap (repeatable action), note, contact (client touch)
+function pushLog(kind, ref, text, clientId) { S.log.push({id:uid(), ts:new Date().toISOString(), day:TODAY, kind, ref:ref || null, text:text || '', clientId:clientId || null}); }
+function addLog(kind, ref, text, clientId) { pushLog(kind, ref, text, clientId); markDirty(); render(); }
 function removeLog(id) { S.log = S.log.filter(x => x.id !== id); markDirty(); render(); }
 const logLabel = x => {
   if (x.kind === 'duty') return (S.settings.duties.find(d => d.id === x.ref) || {}).name || x.text || 'Standing duty';
   if (x.kind === 'tap') return (S.settings.taps.find(d => d.id === x.ref) || {}).name || x.text || 'Action';
+  if (x.kind === 'contact') return x.text || 'Contact logged';
   if (x.duty) return x.note || x.duty; // v1 entries
   return x.text || x.note || '';
 };
+const logKind = x => x.kind === 'duty' ? 'duty' : x.kind === 'tap' ? 'action' : x.kind === 'contact' ? 'contact' : 'note';
 const logCat = x => {
+  if (x.kind === 'contact') return 'followup';
   const src = x.kind === 'duty' ? S.settings.duties : x.kind === 'tap' ? S.settings.taps : [];
   return (src.find(d => d.id === x.ref) || {}).cat || 'other';
 };
 
+// ---------- client / waiting helpers ----------
+const clientById = id => S.clients.find(c => c.id === id) || null;
+const activeClients = () => S.clients.filter(c => c.status === 'active' || c.status === 'onboarding');
+const labelOn = id => (WAIT_ON.find(o => o.id === id) || {name:id}).name;
+const daysSince = iso => iso ? Math.floor((Date.now() - new Date(iso)) / 86400000) : null;
+function resolveClientId(str) {
+  str = String(str || '').trim().toLowerCase(); if (!str) return null;
+  const c = S.clients.find(x => (x.name || '').toLowerCase() === str);
+  return c ? c.id : null;
+}
+function newClient(f) {
+  f = f || {};
+  return {id:uid(), name:f.name || '', business:f.business || '', status:CLIENT_STATUS.includes(f.status) ? f.status : 'onboarding',
+    contact:{name:'', email:'', phone:''}, links:[], notes:'',
+    nextAction:f.nextAction || '', nextActionDue:'', nextFollowUp:'',
+    onboarding:ONBOARDING_TEMPLATE.map(o => ({key:o.key, label:o.label, done:false, doneAt:null})),
+    createdAt:new Date().toISOString(), archivedAt:null};
+}
+const clientRequests = (id, openOnly) => S.queue.filter(q => q.clientId === id && q.source === 'client' && (!openOnly || !q.done));
+const clientWaiting = (id, openOnly) => S.waiting.filter(w => w.clientId === id && (!openOnly || w.status === 'open'));
+function clientLastContacted(c) {
+  const ts = S.log.filter(x => x.clientId === c.id && (x.kind === 'contact' || x.kind === 'note')).map(x => x.ts).sort();
+  return ts.length ? ts[ts.length - 1] : null;
+}
+function clientHealth(c) {
+  if (c.status === 'archived' || c.status === 'paused') return {level:'neutral', reasons:[]};
+  const reasons = [];
+  const since = daysSince(clientLastContacted(c));
+  const overdueReq = clientRequests(c.id, true).some(q => q.due && q.due < TODAY);
+  const overdueWait = clientWaiting(c.id, true).some(w => w.due && w.due < TODAY);
+  if (overdueReq) reasons.push('Overdue request');
+  if (overdueWait) reasons.push('Overdue waiting item');
+  if (!c.nextAction.trim()) reasons.push('No next action');
+  if (since === null && daysSince(c.createdAt) >= 3) reasons.push('Never contacted');
+  else if (since !== null && since >= 8) reasons.push(`No contact in ${since} days`);
+  const red = overdueReq || overdueWait || (since !== null && since >= 14);
+  return {level: reasons.length === 0 ? 'green' : red ? 'red' : 'yellow', reasons};
+}
+function clientTimeline(c) {
+  const ev = [];
+  S.log.filter(x => x.clientId === c.id).forEach(x => ev.push({ts:x.ts, tag:logKind(x), text:logLabel(x)}));
+  S.queue.filter(q => q.clientId === c.id).forEach(q => {
+    ev.push({ts:q.ts || (q.day + 'T12:00:00'), tag: q.source === 'client' ? 'request' : 'task', text:q.title});
+    if (q.done) ev.push({ts:q.doneTs || ((q.doneDay || q.day) + 'T18:00:00'), tag:'closed', text:'Closed: ' + q.title});
+  });
+  S.waiting.filter(w => w.clientId === c.id).forEach(w => {
+    ev.push({ts:w.createdAt, tag:'waiting', text:`Waiting on ${labelOn(w.on)}: ${w.what}`});
+    if (w.status === 'done') ev.push({ts:w.doneAt || w.createdAt, tag:'closed', text:'Resolved: ' + w.what});
+  });
+  c.onboarding.filter(o => o.done && o.doneAt).forEach(o => ev.push({ts:o.doneAt, tag:'onboard', text:'Onboarding: ' + o.label}));
+  return ev.filter(e => e.ts).sort((a, b) => b.ts.localeCompare(a.ts));
+}
+function clientChip(id) { if (!id) return ''; const c = clientById(id); return c ? ` <button class="ctag" data-open-client="${c.id}">${esc(c.name || 'client')}</button>` : ''; }
+
+// ---------- today: numbers, priorities, observations ----------
+function computeStats() {
+  const openQ = S.queue.filter(q => !q.done), openW = S.waiting.filter(w => w.status === 'open');
+  const ac = activeClients();
+  const overdue = openQ.filter(q => q.due && q.due < TODAY).length
+    + openW.filter(w => w.due && w.due < TODAY).length
+    + ac.filter(c => c.nextActionDue && c.nextActionDue < TODAY).length;
+  const dueToday = openQ.filter(q => q.due === TODAY).length
+    + openW.filter(w => w.due === TODAY).length
+    + ac.filter(c => c.nextActionDue === TODAY).length;
+  return {overdue, dueToday, waiting: openW.length, calls: openW.filter(w => w.type === 'call' && w.due === TODAY).length};
+}
+const HR = {red:0, yellow:1, green:2, neutral:3};
+function computePriorities() {
+  const items = [];
+  S.queue.filter(q => !q.done && q.due && q.due <= TODAY).forEach(q => {
+    const c = q.clientId && clientById(q.clientId);
+    items.push({key:'q' + q.id, client: c ? c.name : (q.client || ''), text:q.title, overdue:q.due < TODAY, due:q.due,
+      health: c ? clientHealth(c).level : 'green', go: c ? () => openClient(c.id) : () => showTab('queue')});
+  });
+  activeClients().filter(c => c.nextAction.trim() && c.nextActionDue && c.nextActionDue <= TODAY).forEach(c => {
+    items.push({key:'c' + c.id, client:c.name, text:c.nextAction, overdue:c.nextActionDue < TODAY, due:c.nextActionDue,
+      health: clientHealth(c).level, go: () => openClient(c.id)});
+  });
+  S.waiting.filter(w => w.status === 'open' && w.type === 'call' && w.due && w.due <= TODAY).forEach(w => {
+    const c = w.clientId && clientById(w.clientId);
+    items.push({key:'w' + w.id, client: c ? c.name : '', text:'Call — ' + w.what, overdue:w.due < TODAY, due:w.due,
+      health:'green', go: c ? () => openClient(c.id) : () => goVirtual('waiting')});
+  });
+  items.sort((a, b) => (a.overdue === b.overdue ? 0 : a.overdue ? -1 : 1) || (a.due || '').localeCompare(b.due || '') || HR[a.health] - HR[b.health]);
+  let list = items.slice(0, 5);
+  if (list.length < 3) {
+    const have = new Set(list.map(i => i.key));
+    const extra = activeClients().filter(c => c.nextAction.trim() && !have.has('c' + c.id))
+      .sort((a, b) => (clientLastContacted(a) || '').localeCompare(clientLastContacted(b) || ''))
+      .slice(0, 3 - list.length)
+      .map(c => ({key:'c' + c.id, client:c.name, text:c.nextAction, overdue:false, due:c.nextActionDue || '', health:clientHealth(c).level, go: () => openClient(c.id)}));
+    list = list.concat(extra);
+  }
+  return list;
+}
+function computeObservations() {
+  const ac = activeClients(), out = [];
+  const stale = ac.filter(c => { const s = daysSince(clientLastContacted(c)); return (s !== null && s >= 7) || (s === null && daysSince(c.createdAt) >= 7); }).length;
+  const noAction = ac.filter(c => !c.nextAction.trim()).length;
+  const overdueReq = S.queue.filter(q => !q.done && q.source === 'client' && q.due && q.due < TODAY).length;
+  const overdueWait = S.waiting.filter(w => w.status === 'open' && w.due && w.due < TODAY).length;
+  const longOnboard = S.clients.filter(c => c.status === 'onboarding' && daysSince(c.createdAt) >= 30).length;
+  if (stale > 0) out.push({sev:2, text:`${stale} client${stale === 1 ? " hasn't" : "s haven't"} been contacted in 7+ days.`});
+  if (overdueReq > 0) out.push({sev:3, text:`${overdueReq} client request${overdueReq === 1 ? ' is' : 's are'} overdue.`});
+  if (overdueWait > 0) out.push({sev:3, text:`${overdueWait} waiting item${overdueWait === 1 ? ' is' : 's are'} past due.`});
+  if (noAction > 0) out.push({sev:1, text:`${noAction} active client${noAction === 1 ? ' has' : 's have'} no next action.`});
+  if (longOnboard > 0) out.push({sev:2, text:`${longOnboard} client${longOnboard === 1 ? ' is' : 's are'} still onboarding after 30+ days.`});
+  return out.sort((a, b) => b.sev - a.sev).slice(0, 3);
+}
+
+// ---------- queue / waiting mutations (shared by Queue tab + client page) ----------
+function qDone(id) { const q = S.queue.find(x => x.id === id); if (q) { q.done = true; q.doneDay = TODAY; q.doneTs = new Date().toISOString(); } markDirty(); render(); }
+function qReopen(id) { const q = S.queue.find(x => x.id === id); if (q) { q.done = false; delete q.doneDay; delete q.doneTs; } markDirty(); render(); }
+function qRemove(id) { S.queue = S.queue.filter(x => x.id !== id); markDirty(); render(); }
+function wDone(id) { const w = S.waiting.find(x => x.id === id); if (w) { w.status = 'done'; w.doneAt = new Date().toISOString(); } markDirty(); render(); }
+function wReopen(id) { const w = S.waiting.find(x => x.id === id); if (w) { w.status = 'open'; w.doneAt = null; } markDirty(); render(); }
+function wRemove(id) { S.waiting = S.waiting.filter(x => x.id !== id); markDirty(); render(); }
+
 // ---------- render ----------
 function render() {
-  const viewing = false;
   const dayLog = S.log.filter(x => x.day === TODAY);
   const openQ = S.queue.filter(q => !q.done);
   const closedDay = S.queue.filter(q => q.done && q.doneDay === TODAY);
-  const landedDay = S.queue.filter(q => q.day === TODAY);
   document.getElementById('dateline').textContent = fmtDateLong(new Date());
+  document.getElementById('clientNames').innerHTML = S.clients.filter(c => c.status !== 'archived' && c.name).map(c => `<option value="${esc(c.name)}"></option>`).join('');
+
+  renderStats();
+  renderPriorities();
+  renderNoticed();
+  renderToday(dayLog, false, closedDay);
   const dutiesDone = new Set(dayLog.filter(x => x.kind === 'duty').map(x => x.ref));
-  document.getElementById('tally').innerHTML = [
-    ['duties passed', `${dutiesDone.size}/${S.settings.duties.length}`],
-    ['logged today', dayLog.length],
-    ['landed today', landedDay.length],
-    ['closed today', closedDay.length],
-    ['still open', openQ.length],
-  ].map(([k, n]) => `<div><div class="n">${n}</div><div class="k">${k}</div></div>`).join('');
-  renderToday(dayLog, viewing, closedDay);
+  const tapsN = dayLog.filter(x => x.kind === 'tap').length;
+  document.getElementById('dailySummary').textContent = `Daily checklist — ${dutiesDone.size}/${S.settings.duties.length} duties · ${tapsN} action${tapsN === 1 ? '' : 's'}`;
+  renderRecent();
+  renderClientList();
+  renderClient();
   renderQueue(openQ);
+  renderWaiting();
   renderWeek();
   renderSetup();
   renderHistory();
+  renderGlance();
+
   document.getElementById('tabQueueN').textContent = openQ.length || '';
-  document.getElementById('footLeft').textContent = `${S.log.length} entries on record · ${S.queue.length} queue items`;
+  document.getElementById('tabClientsN').textContent = activeClients().length || '';
+  document.getElementById('footLeft').textContent = `${S.clients.length} clients · ${S.queue.length} queue · ${S.log.length} entries`;
   const first = S.log.length ? S.log.reduce((a, b) => a.day < b.day ? a : b).day : TODAY;
   document.getElementById('footRight').textContent = `Ledger since ${fmtDateShort(first)}`;
 }
@@ -489,8 +846,7 @@ function renderToday(dayLog, viewing, closedDay) {
     `<div class="counter"><div class="n">${counts[t.id]}</div><div class="k">${esc(t.name)}</div></div>`).join('') +
     `<div class="counter"><div class="n">${notes}</div><div class="k">Notes</div></div>`;
   document.getElementById('taps').innerHTML = S.settings.taps.map(t => `<button class="tap" data-tap="${t.id}"><span class="t">${esc(t.name)}</span><span class="s">tap to log · ${esc((catById[t.cat] || catById.other).name.toLowerCase())}</span></button>`).join('');
-  document.getElementById('todayMeta').textContent = dayLog.length ? `${dayLog.length} entr${dayLog.length === 1 ? 'y' : 'ies'} · last at ${fmtTime(dayLog[dayLog.length-1].ts)}` : (viewing ? 'Nothing was logged that day' : 'Nothing logged yet');
-  const rows = dayLog.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${x.kind === 'duty' ? 'duty' : x.kind === 'tap' ? 'action' : 'note'}</span>${esc(logLabel(x))}`, id:x.id, rm:!viewing && x.kind !== undefined}))
+  const rows = dayLog.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${clientChip(x.clientId)}`, id:x.id, rm:!viewing && x.kind !== undefined}))
     .concat(closedDay.map(q => ({ts:q.doneTs || (q.doneDay + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}${q.client ? ' <span style="color:var(--muted)">· ' + esc(q.client) + '</span>' : ''}`, id:null, rm:false})))
     .sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
   document.getElementById('todayLog').innerHTML = rows.length ? rows.map(r => `
@@ -514,15 +870,19 @@ document.getElementById('noteform').addEventListener('submit', e => {
 document.getElementById('todayLog').addEventListener('click', e => { const b = e.target.closest('[data-rm-log]'); if (b && !readOnly) removeLog(b.dataset.rmLog); });
 
 // ---------- tabs ----------
-let TAB = 'today';
-try { const t = localStorage.getItem('ledger-tab'); if (t) TAB = t; } catch (e) {}
+const PRIMARY = ['today', 'clients', 'queue', 'reports'];
+let TAB = 'today', RETURN_TAB = 'clients';
+try { const t = localStorage.getItem('ledger-tab'); if (t && PRIMARY.includes(t)) TAB = t; } catch (e) {}
 function showTab(id) {
   TAB = id;
-  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.go === id));
+  const hi = id === 'client' ? 'clients' : id === 'waiting' ? 'today' : id === 'setup' ? '' : id;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.go === hi));
   document.querySelectorAll('section[data-tab]').forEach(sec => sec.classList.toggle('active', sec.dataset.tab === id));
-  try { localStorage.setItem('ledger-tab', id); } catch (e) {}
+  if (PRIMARY.includes(id)) { try { localStorage.setItem('ledger-tab', id); } catch (e) {} }
   window.scrollTo({top:0});
+  render();
 }
+function goVirtual(id) { if (PRIMARY.includes(TAB)) RETURN_TAB = TAB; showTab(id); }
 document.getElementById('tabs').addEventListener('click', e => { const b = e.target.closest('.tab'); if (b) showTab(b.dataset.go); });
 
 // ---------- history ----------
@@ -538,7 +898,6 @@ function renderHistory() {
   const known = new Set(DAYS.map(d => d.day));
   S.log.forEach(x => known.add(x.day)); S.queue.forEach(q => { known.add(q.day); if (q.doneDay) known.add(q.doneDay); });
   const days = [...known].filter(k => k && k < TODAY).sort().reverse();
-  document.getElementById('tabHistN').textContent = days.length || '';
   document.getElementById('histMeta').textContent = days.length ? `${days.length} day${days.length === 1 ? '' : 's'} on record` : 'Nothing before today yet';
   const list = document.getElementById('histList'), detail = document.getElementById('histDay');
   if (HIST_DAY) {
@@ -549,8 +908,8 @@ function renderHistory() {
     document.getElementById('histDuties').innerHTML = S.settings.duties.map(d => { const n = sm.log.filter(x => x.kind === 'duty' && x.ref === d.id).length; return `<span class="${n ? 'ok' : ''}">${n ? '✓' : '✗'} ${esc(d.name)}${n > 1 ? ' ×' + n : ''}</span>`; }).join('');
     const landed = S.queue.filter(q => q.day === k);
     document.getElementById('histLanded').innerHTML = landed.length ? landed.map(qRow).join('') : `<div class="row empty">Nothing landed that day.</div>`;
-    const rows = sm.log.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${x.kind === 'duty' ? 'duty' : x.kind === 'tap' ? 'action' : 'note'}</span>${esc(logLabel(x))}`}))
-      .concat(S.queue.filter(q => q.done && q.doneDay === k).map(q => ({ts:q.doneTs || (k + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}`})))
+    const rows = sm.log.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${clientChip(x.clientId)}`}))
+      .concat(S.queue.filter(q => q.done && q.doneDay === k).map(q => ({ts:q.doneTs || (k + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}${clientChip(q.clientId)}`})))
       .sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
     document.getElementById('histLog').innerHTML = rows.length ? rows.map(r => `<div class="row"><span class="ts">${fmtTime(r.ts)}</span><span>${r.html}</span><span></span></div>`).join('') : `<div class="row empty">No entries on record for this day.</div>`;
     return;
@@ -565,14 +924,14 @@ document.getElementById('histList').addEventListener('click', e => { const b = e
 document.getElementById('histBack').addEventListener('click', () => { HIST_DAY = null; renderHistory(); });
 
 // ---------- queue ----------
-const SRC_LABEL = {boss:'from a boss', slack:'from Slack', email:'from email', skool:'from Skool', self:'self-assigned'};
+const SRC_LABEL = {boss:'from a boss', slack:'from Slack', email:'from email', skool:'from Skool', client:'client request', self:'self-assigned'};
 function ageLabel(day) { const n = daysBetween(day, TODAY); return n <= 0 ? 'landed today' : n === 1 ? 'open 1 day' : `open ${n} days`; }
 function qRow(q) {
   const n = daysBetween(q.day, TODAY);
   const ageCls = n >= 7 ? 'older' : n >= 3 ? 'old' : '';
   const cat = catById[q.cat] || catById.other;
   const who = q.by ? ` · ${esc(q.by)}` : '';
-  const src = `<span class="chip ${esc(q.source)}">${esc(SRC_LABEL[q.source] || q.source)}</span>${esc(cat.name)}${who} · landed ${fmtDateShort(q.day)}${q.ts ? ' ' + fmtTime(q.ts) : ''}${q.client ? ' · <strong>' + esc(q.client) + '</strong>' : ''}`;
+  const src = `<span class="chip ${esc(q.source)}">${esc(SRC_LABEL[q.source] || q.source)}</span>${esc(cat.name)}${who} · landed ${fmtDateShort(q.day)}${q.ts ? ' ' + fmtTime(q.ts) : ''}${q.clientId ? clientChip(q.clientId) : (q.client ? ' · <strong>' + esc(q.client) + '</strong>' : '')}`;
   let due = '';
   if (q.due && !q.done) { const d = daysBetween(TODAY, q.due); due = `<div class="due ${d < 0 ? 'over' : d === 0 ? 'today' : ''}">${d < 0 ? `overdue ${-d}d` : d === 0 ? 'due today' : `due ${fmtDateShort(q.due)}`}</div>`; }
   const right = q.done ? `closed ${fmtDateShort(q.doneDay)} ${q.doneTs ? fmtTime(q.doneTs) : ''}` : ageLabel(q.day);
@@ -587,10 +946,11 @@ function qRow(q) {
 }
 function renderQueue(openQ) {
   const catSel = document.getElementById('qCat'); if (!catSel.childElementCount) catSel.innerHTML = CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
-  const fSel = document.getElementById('qFilter'); if (fSel.childElementCount === 1) fSel.innerHTML += CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  const fSel = document.getElementById('qFilter'); if (fSel.childElementCount <= 2) fSel.innerHTML += CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
   const filter = fSel.value, sort = document.getElementById('qSort').value;
   let list = openQ.slice();
-  if (filter !== 'all') list = list.filter(q => q.cat === filter);
+  if (filter === '__req') list = list.filter(q => q.source === 'client');
+  else if (filter !== 'all') list = list.filter(q => q.cat === filter);
   if (sort === 'newest') list.sort((a, b) => b.day.localeCompare(a.day) || (b.ts || '').localeCompare(a.ts || ''));
   else if (sort === 'due') list.sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || a.day.localeCompare(b.day));
   else if (sort === 'cat') list.sort((a, b) => a.cat.localeCompare(b.cat) || a.day.localeCompare(b.day));
@@ -610,8 +970,9 @@ document.getElementById('qform').addEventListener('submit', e => {
   e.preventDefault(); if (readOnly) return;
   const title = document.getElementById('qTitle').value.trim(); if (!title) return;
   const when = document.getElementById('qWhen').value || TODAY;
+  const cv = document.getElementById('qClient').value.trim();
   S.queue.push({id:uid(), title, cat:document.getElementById('qCat').value, source:document.getElementById('qSource').value,
-    by:document.getElementById('qBy').value.trim(), client:document.getElementById('qClient').value.trim(), due:document.getElementById('qDue').value || '',
+    by:document.getElementById('qBy').value.trim(), client:cv, clientId:resolveClientId(cv), due:document.getElementById('qDue').value || '',
     day:when, ts: when === TODAY ? new Date().toISOString() : null, done:false});
   ['qTitle','qBy','qClient','qDue'].forEach(id => document.getElementById(id).value = '');
   markDirty(); render();
@@ -684,10 +1045,375 @@ document.getElementById('setup').addEventListener('click', e => {
 });
 document.getElementById('addDuty').addEventListener('click', () => { if (readOnly) return; S.settings.duties.push({id:uid(), name:'New standing duty', cat:'other'}); markDirty(); render(); const i = document.querySelector('#dutyRows .rowset:last-child input'); if (i) { i.focus(); i.select(); } });
 document.getElementById('addTap').addEventListener('click', () => { if (readOnly) return; S.settings.taps.push({id:uid(), name:'New action', cat:'other'}); markDirty(); render(); const i = document.querySelector('#tapRows .rowset:last-child input'); if (i) { i.focus(); i.select(); } });
+document.getElementById('setupBack').addEventListener('click', () => showTab(RETURN_TAB));
+document.getElementById('gear').addEventListener('click', () => goVirtual('setup'));
+
+// ---------- today: stats / priorities / noticed / recent ----------
+function renderStats() {
+  const s = computeStats();
+  document.getElementById('stats').innerHTML = [
+    ['Urgent', s.overdue, 'crit'], ['Due today', s.dueToday, 'warn'], ['Waiting', s.waiting, 'accent'], ['Calls', s.calls, 'good'],
+  ].map(([k, n, cls]) => `<button class="stat ${cls}" data-stat="${k}"><span class="n">${n}</span><span class="k">${k}</span></button>`).join('');
+}
+document.getElementById('stats').addEventListener('click', e => {
+  const b = e.target.closest('[data-stat]'); if (!b) return;
+  if (b.dataset.stat === 'Waiting' || b.dataset.stat === 'Calls') goVirtual('waiting'); else showTab('queue');
+});
+
+let PRIO = [];
+function renderPriorities() {
+  PRIO = computePriorities();
+  document.getElementById('prioMeta').textContent = PRIO.length ? '' : 'nothing pressing';
+  document.getElementById('priorities').innerHTML = PRIO.length ? PRIO.map(p => `
+    <div class="row prio ${p.overdue ? 'over' : ''}" data-prio="${p.key}">
+      <span class="ts">${p.overdue ? 'overdue' : (p.due === TODAY ? 'today' : (p.due ? fmtDateShort(p.due) : 'soon'))}</span>
+      <span>${p.client ? '<b>' + esc(p.client) + '</b> — ' : ''}${esc(p.text)}</span>
+      <span class="chev">›</span>
+    </div>`).join('') : `<div class="row empty">Nothing urgent right now. Nice.</div>`;
+}
+document.getElementById('priorities').addEventListener('click', e => {
+  const r = e.target.closest('[data-prio]'); if (!r) return;
+  const it = PRIO.find(p => p.key === r.dataset.prio); if (it && it.go) it.go();
+});
+
+function renderNoticed() {
+  const obs = computeObservations();
+  document.getElementById('noticed').innerHTML = obs.length
+    ? `<div class="noticed-inner"><span class="nlabel">AI noticed</span><ul>${obs.map(o => `<li>${esc(o.text)}</li>`).join('')}</ul></div>` : '';
+}
+
+function renderRecent() {
+  const ev = [];
+  S.log.slice(-40).forEach(x => ev.push({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${clientChip(x.clientId)}`}));
+  S.queue.filter(q => q.done).slice(-20).forEach(q => ev.push({ts:q.doneTs, html:`<span class="chip">closed</span>${esc(q.title)}${clientChip(q.clientId)}`}));
+  S.waiting.filter(w => w.status === 'done').slice(-20).forEach(w => ev.push({ts:w.doneAt, html:`<span class="chip">resolved</span>${esc(w.what)}${clientChip(w.clientId)}`}));
+  const rows = ev.filter(e => e.ts).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 8);
+  document.getElementById('recent').innerHTML = rows.length
+    ? rows.map(r => `<div class="row"><span class="ts">${fmtDateShort(r.ts.slice(0, 10))} ${fmtTime(r.ts)}</span><span>${r.html}</span><span></span></div>`).join('')
+    : `<div class="row empty">Activity will show up here.</div>`;
+}
+
+// dailychecklist open-state
+const dailyWrap = document.getElementById('dailyWrap');
+try { if (localStorage.getItem('ledger-daily-open') === '1') dailyWrap.open = true; } catch (e) {}
+dailyWrap.addEventListener('toggle', () => { try { localStorage.setItem('ledger-daily-open', dailyWrap.open ? '1' : '0'); } catch (e) {} });
+
+// ---------- clients ----------
+let CURRENT_CLIENT = null;
+function openClient(id) {
+  const c = clientById(id); if (!c) { toast('Client not found'); return; }
+  CURRENT_CLIENT = id;
+  if (PRIMARY.includes(TAB)) RETURN_TAB = TAB;
+  clearSearch();
+  showTab('client');
+}
+function renderClientList() {
+  const q = (document.getElementById('clientSearch').value || '').trim().toLowerCase();
+  const f = document.getElementById('clientStatusFilter').value;
+  let list = S.clients.slice();
+  if (f === 'active') list = list.filter(c => c.status === 'active' || c.status === 'onboarding');
+  else if (f !== 'all') list = list.filter(c => c.status === f);
+  if (q) list = list.filter(c => (c.name + ' ' + c.business).toLowerCase().includes(q));
+  list.sort((a, b) => HR[clientHealth(a).level] - HR[clientHealth(b).level] || (a.name || '').localeCompare(b.name || ''));
+  document.getElementById('clientsMeta').textContent = `${S.clients.length} total · ${activeClients().length} active`;
+  document.getElementById('clientList').innerHTML = list.length ? list.map(c => {
+    const h = clientHealth(c), lc = clientLastContacted(c), s = daysSince(lc), na = c.nextAction.trim();
+    return `<button class="crow" data-open-client="${c.id}"${h.reasons.length ? ` title="${esc(h.reasons.join(' · '))}"` : ''}>
+      <span class="cname">${esc(c.name || 'Unnamed')}</span>
+      <span class="cbiz">${esc(c.business || '')}</span>
+      <span class="dot ${h.level}"></span>
+      <span class="cnext ${na ? '' : 'miss'}">${na ? esc(na) : '— set next action —'}</span>
+      <span class="clast mono">${lc ? (s === 0 ? 'today' : s + 'd ago') : 'never'}</span>
+    </button>`;
+  }).join('') : `<div class="row empty">No clients${q || f !== 'all' ? ' match' : ' yet — use “+ Client”'}.</div>`;
+}
+document.getElementById('clientSearch').addEventListener('input', renderClientList);
+document.getElementById('clientStatusFilter').addEventListener('change', renderClientList);
+document.getElementById('addClientBtn').addEventListener('click', () => qaOpen('client'));
+document.getElementById('clientBack').addEventListener('click', () => showTab('clients'));
+
+function wRow(w) {
+  const c = w.clientId && clientById(w.clientId);
+  const overdue = w.status === 'open' && w.due && w.due < TODAY;
+  const base = w.requestedDate || (w.createdAt || '').slice(0, 10) || TODAY;
+  const right = w.status === 'done'
+    ? `resolved ${w.doneAt ? fmtDateShort(w.doneAt.slice(0, 10)) : ''}`
+    : (w.due ? `${overdue ? 'overdue' : 'due'} ${fmtDateShort(w.due)}` : ageLabel(base));
+  return `<div class="qrow ${w.status === 'done' ? 'done' : ''}">
+    <span class="cat" style="background:${w.type === 'call' ? 'var(--slack)' : 'var(--accent)'}"></span>
+    <div><div class="title">${esc(w.what)}${w.type === 'call' ? ' <span class="chip">call</span>' : ''}</div>
+      <div class="src"><span class="chip">on ${esc(labelOn(w.on))}</span>${c ? clientChip(c.id) : ''}${w.notes ? ' · ' + esc(w.notes) : ''} · asked ${fmtDateShort(base)}</div></div>
+    <span class="age ${overdue ? 'older' : ''}">${right}</span>
+    <span>${w.status === 'done'
+      ? `<button class="btn ghost small rw" data-w-reopen="${w.id}">Reopen</button>`
+      : `<button class="btn small rw" data-w-done="${w.id}">Done</button> <button class="btn ghost small rw" data-w-rm="${w.id}" title="Remove">×</button>`}</span>
+  </div>`;
+}
+
+function renderClient() {
+  const body = document.getElementById('clientBody');
+  const c = clientById(CURRENT_CLIENT);
+  if (!c) { body.innerHTML = `<div class="row empty">Pick a client from the list.</div>`; return; }
+  const dis = readOnly ? ' disabled' : '';
+  const h = clientHealth(c);
+  const ob = c.onboarding, obDone = ob.filter(o => o.done).length, pct = Math.round(100 * obDone / ob.length);
+  const reqs = clientRequests(c.id, true), waits = clientWaiting(c.id, true), tl = clientTimeline(c);
+  const catOpts = sel => CATS.map(x => `<option value="${x.id}"${x.id === sel ? ' selected' : ''}>${esc(x.name)}</option>`).join('');
+  body.innerHTML = `
+    <div class="cp-head">
+      <div><h2>${esc(c.name || 'Unnamed')}</h2><div class="sub">${esc(c.business || '')}</div></div>
+      <div class="cp-head-tools">
+        <span class="dot ${h.level}"${h.reasons.length ? ` title="${esc(h.reasons.join(' · '))}"` : ''}></span>
+        <select data-cf="status"${dis}>${CLIENT_STATUS.map(s => `<option value="${s}"${s === c.status ? ' selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}</select>
+        <button class="btn small rw" data-log-contact>Log contact</button>
+      </div>
+    </div>
+    ${h.reasons.length ? `<div class="cp-reasons">${esc(h.reasons.join(' · '))}</div>` : ''}
+    <div class="cp-grid">
+      <div class="cp-card">
+        <div class="sub-h">Next action</div>
+        <input type="text" data-cf="nextAction" value="${esc(c.nextAction)}" placeholder="What's the next move?"${dis}>
+        <label>Due<input type="date" data-cf="nextActionDue" value="${esc(c.nextActionDue)}"${dis}></label>
+        <label>Next follow-up<input type="date" data-cf="nextFollowUp" value="${esc(c.nextFollowUp)}"${dis}></label>
+      </div>
+      <div class="cp-card">
+        <div class="sub-h">Onboarding</div>
+        <div class="progress"><span style="width:${pct}%"></span></div>
+        <details class="ob"><summary>${obDone} / ${ob.length} complete</summary>
+          <div class="oblist">${ob.map(o => `<label><input type="checkbox" data-ob="${o.key}"${o.done ? ' checked' : ''}${dis}> ${esc(o.label)}</label>`).join('')}</div>
+        </details>
+      </div>
+    </div>
+    <div class="cp-card">
+      <div class="sechead sm"><h3>Open requests</h3><span class="mono">${reqs.length}</span></div>
+      <div class="ledger">${reqs.length ? reqs.map(qRow).join('') : '<div class="row empty">None open.</div>'}</div>
+      <form class="rw cp-add" data-add="request">
+        <input type="text" name="what" placeholder="New request" required>
+        <select name="cat">${catOpts('gbp')}</select>
+        <button class="btn small" type="submit">Add</button>
+      </form>
+    </div>
+    <div class="cp-card">
+      <div class="sechead sm"><h3>Waiting on</h3><span class="mono">${waits.length}</span></div>
+      <div class="ledger">${waits.length ? waits.map(wRow).join('') : '<div class="row empty">Nothing pending.</div>'}</div>
+      <form class="rw cp-add" data-add="waiting">
+        <input type="text" name="what" placeholder="Waiting for…" required>
+        <select name="on">${WAIT_ON.map(o => `<option value="${o.id}"${o.id === 'client' ? ' selected' : ''}>${o.name}</option>`).join('')}</select>
+        <select name="type"><option value="item">Item</option><option value="call">Call</option></select>
+        <input type="date" name="due" title="Due">
+        <button class="btn small" type="submit">Add</button>
+      </form>
+    </div>
+    <div class="cp-grid">
+      <div class="cp-card">
+        <div class="sub-h">Contact &amp; business</div>
+        <input type="text" data-cf2="name" value="${esc(c.contact.name || '')}" placeholder="Contact name"${dis}>
+        <input type="text" data-cf2="email" value="${esc(c.contact.email || '')}" placeholder="Email"${dis}>
+        <input type="text" data-cf2="phone" value="${esc(c.contact.phone || '')}" placeholder="Phone"${dis}>
+      </div>
+      <div class="cp-card">
+        <div class="sub-h">Links</div>
+        <div>${c.links.length ? c.links.map((l, i) => `<div class="linkrow"><a href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label || l.url)}</a>${readOnly ? '' : `<button class="btn ghost small" data-rm-link="${i}">×</button>`}</div>`).join('') : '<div class="hint" style="margin:0">No links.</div>'}</div>
+        <form class="rw cp-add" data-add="link">
+          <input type="text" name="label" placeholder="Label">
+          <input type="text" name="url" placeholder="https://">
+          <button class="btn small" type="submit">Add</button>
+        </form>
+      </div>
+    </div>
+    <div class="cp-card">
+      <div class="sub-h">Notes</div>
+      <textarea data-cf="notes" rows="4"${dis}>${esc(c.notes || '')}</textarea>
+    </div>
+    <div class="cp-card">
+      <div class="sub-h">Activity timeline</div>
+      <div class="ledger">${tl.length ? tl.slice(0, 60).map(e => `<div class="row"><span class="ts">${fmtDateShort(e.ts.slice(0, 10))} ${fmtTime(e.ts)}</span><span><span class="chip">${esc(e.tag)}</span>${esc(e.text)}</span><span></span></div>`).join('') : '<div class="row empty">No activity yet.</div>'}</div>
+    </div>`;
+}
+const cbody = document.getElementById('clientBody');
+cbody.addEventListener('change', e => {
+  if (readOnly) return;
+  const c = clientById(CURRENT_CLIENT); if (!c) return;
+  const cf = e.target.dataset.cf, cf2 = e.target.dataset.cf2, ob = e.target.dataset.ob;
+  if (cf === 'status') { c.status = e.target.value; c.archivedAt = c.status === 'archived' ? new Date().toISOString() : null; }
+  else if (cf) c[cf] = e.target.value;
+  else if (cf2) c.contact[cf2] = e.target.value;
+  else if (ob) { const o = c.onboarding.find(o => o.key === ob); if (o) { o.done = e.target.checked; o.doneAt = e.target.checked ? new Date().toISOString() : null; } }
+  else return;
+  markDirty(); render();
+});
+cbody.addEventListener('submit', e => {
+  e.preventDefault(); if (readOnly) return;
+  const c = clientById(CURRENT_CLIENT); if (!c) return;
+  const kind = e.target.dataset.add, fd = new FormData(e.target), g = k => (fd.get(k) || '').toString().trim();
+  const now = new Date().toISOString();
+  if (kind === 'request') { const t = g('what'); if (!t) return; S.queue.push({id:uid(), title:t, cat:g('cat') || 'gbp', source:'client', by:'', client:c.name, clientId:c.id, due:'', day:TODAY, ts:now, done:false}); }
+  else if (kind === 'waiting') { const t = g('what'); if (!t) return; S.waiting.push({id:uid(), clientId:c.id, what:t, on:g('on') || 'other', type:g('type') === 'call' ? 'call' : 'item', requestedDate:TODAY, due:g('due') || '', status:'open', notes:'', createdAt:now, doneAt:null}); }
+  else if (kind === 'link') { const u = g('url'); if (!u) return; c.links.push({label:g('label') || u, url:u}); }
+  else return;
+  markDirty(); render();
+});
+cbody.addEventListener('click', e => {
+  if (readOnly) return;
+  const c = clientById(CURRENT_CLIENT); if (!c) return;
+  if (e.target.closest('[data-log-contact]')) { pushLog('contact', null, 'Contacted ' + (c.name || 'client'), c.id); markDirty(); render(); toast('Contact logged'); return; }
+  const rml = e.target.closest('[data-rm-link]'); if (rml) { c.links.splice(+rml.dataset.rmLink, 1); markDirty(); render(); return; }
+  const qd = e.target.closest('[data-q-done]'), qr = e.target.closest('[data-q-reopen]'), qx = e.target.closest('[data-q-rm]');
+  if (qd) return qDone(qd.dataset.qDone);
+  if (qr) return qReopen(qr.dataset.qReopen);
+  if (qx) return qRemove(qx.dataset.qRm);
+  const wd = e.target.closest('[data-w-done]'), wr = e.target.closest('[data-w-reopen]'), wx = e.target.closest('[data-w-rm]');
+  if (wd) return wDone(wd.dataset.wDone);
+  if (wr) return wReopen(wr.dataset.wReopen);
+  if (wx) return wRemove(wx.dataset.wRm);
+});
+
+// ---------- waiting on ----------
+function renderWaiting() {
+  const open = S.waiting.filter(w => w.status === 'open').sort((a, b) => (a.due || '9999').localeCompare(b.due || '9999') || (a.createdAt || '').localeCompare(b.createdAt || ''));
+  const closed = S.waiting.filter(w => w.status === 'done').sort((a, b) => (b.doneAt || '').localeCompare(a.doneAt || ''));
+  document.getElementById('waitMeta').textContent = `${open.length} open · ${open.filter(w => w.type === 'call').length} calls · ${closed.length} resolved`;
+  document.getElementById('waitOpen').innerHTML = open.length ? open.map(wRow).join('') : `<div class="row empty">Nothing outstanding.</div>`;
+  document.getElementById('waitClosedSum').textContent = `Resolved · ${closed.length}`;
+  document.getElementById('waitClosed').innerHTML = closed.slice(0, 60).map(wRow).join('') || `<div class="row empty">Nothing resolved yet.</div>`;
+}
+document.getElementById('waitBack').addEventListener('click', () => showTab(PRIMARY.includes(RETURN_TAB) ? RETURN_TAB : 'today'));
+document.getElementById('waitForm').addEventListener('submit', e => {
+  e.preventDefault(); if (readOnly) return;
+  const t = document.getElementById('wWhat').value.trim(); if (!t) return;
+  const cv = document.getElementById('wClient').value.trim();
+  S.waiting.push({id:uid(), clientId:resolveClientId(cv), what:t, on:document.getElementById('wOn').value,
+    type:document.getElementById('wType').value === 'call' ? 'call' : 'item',
+    requestedDate:document.getElementById('wReq').value || TODAY, due:document.getElementById('wDue').value || '',
+    status:'open', notes:'', createdAt:new Date().toISOString(), doneAt:null});
+  ['wWhat', 'wClient', 'wReq', 'wDue'].forEach(id => document.getElementById(id).value = '');
+  markDirty(); render();
+});
+document.getElementById('waiting').addEventListener('click', e => {
+  if (readOnly) return;
+  const wd = e.target.closest('[data-w-done]'), wr = e.target.closest('[data-w-reopen]'), wx = e.target.closest('[data-w-rm]');
+  if (wd) wDone(wd.dataset.wDone);
+  else if (wr) wReopen(wr.dataset.wReopen);
+  else if (wx) wRemove(wx.dataset.wRm);
+});
+
+// ---------- reports: client glance ----------
+function renderGlance() {
+  const act = S.clients.filter(c => c.status === 'active').length;
+  const onb = S.clients.filter(c => c.status === 'onboarding').length;
+  const hs = {green:0, yellow:0, red:0};
+  activeClients().forEach(c => { const l = clientHealth(c).level; if (hs[l] !== undefined) hs[l]++; });
+  const or = S.queue.filter(q => !q.done && q.source === 'client').length;
+  const ow = S.waiting.filter(w => w.status === 'open').length;
+  document.getElementById('glance').innerHTML =
+    `<span><b>${act}</b> active</span><span><b>${onb}</b> onboarding</span>` +
+    `<span><span class="dot green"></span> <b>${hs.green}</b> &nbsp; <span class="dot yellow"></span> <b>${hs.yellow}</b> &nbsp; <span class="dot red"></span> <b>${hs.red}</b></span>` +
+    `<span><b>${or}</b> open requests</span><span><b>${ow}</b> waiting</span>`;
+}
+
+// ---------- quick add ----------
+let QA_TYPE = 'task';
+const qaOverlay = document.getElementById('qaOverlay');
+function qaOpen(type) {
+  if (readOnly) return;
+  QA_TYPE = type || 'task';
+  qaOverlay.hidden = false;
+  qaOverlay.querySelectorAll('.qa-types button').forEach(b => b.classList.toggle('active', b.dataset.qa === QA_TYPE));
+  qaFields();
+  const f = qaOverlay.querySelector('#qaFields input, #qaFields select'); if (f) f.focus();
+}
+function qaClose() { qaOverlay.hidden = true; document.getElementById('qaForm').reset(); }
+function qaFields() {
+  const dl = 'list="clientNames"', cat = sel => CATS.map(c => `<option value="${c.id}"${c.id === sel ? ' selected' : ''}>${esc(c.name)}</option>`).join('');
+  const F = {
+    task: `<input name="title" placeholder="What needs doing" required>
+           <input name="client" ${dl} placeholder="Client (optional)">
+           <select name="cat">${cat('other')}</select>
+           <input type="date" name="due" title="Due">`,
+    request: `<input name="client" ${dl} placeholder="Client" required>
+              <input name="what" placeholder="What they asked for" required>
+              <select name="cat">${cat('gbp')}</select>`,
+    activity: `<input name="what" placeholder="What happened" required>
+               <input name="client" ${dl} placeholder="Client (optional)">`,
+    note: `<input name="text" placeholder="Note — one line" required>
+           <input name="client" ${dl} placeholder="Client (optional)">`,
+    waiting: `<input name="what" placeholder="What are we waiting for" required>
+              <input name="client" ${dl} placeholder="Client (optional)">
+              <select name="on">${WAIT_ON.map(o => `<option value="${o.id}"${o.id === 'client' ? ' selected' : ''}>${o.name}</option>`).join('')}</select>
+              <select name="type"><option value="item">Item</option><option value="call">Call</option></select>
+              <input type="date" name="due" title="Due">`,
+    client: `<input name="name" placeholder="Client name" required>
+             <input name="business" placeholder="Business name">
+             <select name="status">${CLIENT_STATUS.map(s => `<option value="${s}"${s === 'onboarding' ? ' selected' : ''}>${s[0].toUpperCase() + s.slice(1)}</option>`).join('')}</select>`,
+  };
+  document.getElementById('qaFields').innerHTML = F[QA_TYPE];
+}
+document.getElementById('qaTypes').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  QA_TYPE = b.dataset.qa;
+  qaOverlay.querySelectorAll('.qa-types button').forEach(x => x.classList.toggle('active', x === b));
+  qaFields();
+});
+document.getElementById('qaCancel').addEventListener('click', qaClose);
+qaOverlay.addEventListener('click', e => { if (e.target === qaOverlay) qaClose(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !qaOverlay.hidden) qaClose(); });
+document.getElementById('quickAdd').addEventListener('click', () => qaOpen('task'));
+document.getElementById('qaForm').addEventListener('submit', e => {
+  e.preventDefault(); if (readOnly) return;
+  const fd = new FormData(e.target), g = k => (fd.get(k) || '').toString().trim(), now = new Date().toISOString();
+  if (QA_TYPE === 'task') {
+    const t = g('title'); if (!t) return;
+    S.queue.push({id:uid(), title:t, cat:g('cat') || 'other', source:'self', by:'', client:g('client'), clientId:resolveClientId(g('client')), due:g('due') || '', day:TODAY, ts:now, done:false});
+  } else if (QA_TYPE === 'request') {
+    const t = g('what'); if (!t) return;
+    S.queue.push({id:uid(), title:t, cat:g('cat') || 'gbp', source:'client', by:'', client:g('client'), clientId:resolveClientId(g('client')), due:'', day:TODAY, ts:now, done:false});
+  } else if (QA_TYPE === 'activity') {
+    const t = g('what'); if (!t) return; pushLog('contact', null, t, resolveClientId(g('client')));
+  } else if (QA_TYPE === 'note') {
+    const t = g('text'); if (!t) return; pushLog('note', null, t, resolveClientId(g('client')));
+  } else if (QA_TYPE === 'waiting') {
+    const t = g('what'); if (!t) return;
+    S.waiting.push({id:uid(), clientId:resolveClientId(g('client')), what:t, on:g('on') || 'other', type:g('type') === 'call' ? 'call' : 'item', requestedDate:TODAY, due:g('due') || '', status:'open', notes:'', createdAt:now, doneAt:null});
+  } else if (QA_TYPE === 'client') {
+    const n = g('name'); if (!n) return;
+    const c = newClient({name:n, business:g('business'), status:g('status')});
+    S.clients.push(c); markDirty(); render(); qaClose(); openClient(c.id); toast('Client added'); return;
+  }
+  markDirty(); render(); qaClose(); toast('Added');
+});
+
+// ---------- global search ----------
+const gsearch = document.getElementById('gsearch'), gresults = document.getElementById('gresults');
+let searchT, SEARCH_RES = [];
+function clearSearch() { gsearch.value = ''; gresults.hidden = true; }
+function runSearch(str) {
+  str = str.trim().toLowerCase(); if (!str) return [];
+  const res = [];
+  S.clients.forEach(c => { if ((c.name + ' ' + c.business).toLowerCase().includes(str)) res.push({t:'Client', label:c.name + (c.business ? ' · ' + c.business : ''), go:() => openClient(c.id)}); });
+  S.queue.forEach(qi => { if ((qi.title || '').toLowerCase().includes(str)) res.push({t:qi.source === 'client' ? 'Request' : 'Task', label:qi.title, go:() => qi.clientId ? openClient(qi.clientId) : showTab('queue')}); });
+  S.waiting.forEach(w => { if ((w.what || '').toLowerCase().includes(str)) res.push({t:'Waiting', label:w.what, go:() => w.clientId ? openClient(w.clientId) : goVirtual('waiting')}); });
+  S.log.forEach(x => { const l = logLabel(x); if (l && l.toLowerCase().includes(str)) res.push({t:'Activity', label:l, go:() => x.clientId ? openClient(x.clientId) : showTab('today')}); });
+  return res.slice(0, 12);
+}
+function doSearch() {
+  SEARCH_RES = runSearch(gsearch.value);
+  if (!SEARCH_RES.length) { gresults.hidden = true; return; }
+  gresults.innerHTML = SEARCH_RES.map((r, i) => `<button type="button" data-si="${i}"><span class="rt">${r.t}</span>${esc(r.label)}</button>`).join('');
+  gresults.hidden = false;
+}
+gsearch.addEventListener('input', () => { clearTimeout(searchT); searchT = setTimeout(doSearch, 130); });
+gsearch.addEventListener('focus', doSearch);
+gresults.addEventListener('click', e => { const b = e.target.closest('[data-si]'); if (!b) return; const r = SEARCH_RES[+b.dataset.si]; if (r) { clearSearch(); r.go(); } });
+document.addEventListener('click', e => { if (!e.target.closest('.search')) gresults.hidden = true; });
+
+// open-client delegation — client rows and client chips anywhere
+document.body.addEventListener('click', e => {
+  const b = e.target.closest('[data-open-client]'); if (!b) return;
+  e.preventDefault(); openClient(b.dataset.openClient);
+});
 
 // ---------- go ----------
-render();
-showTab(readOnly && TAB === 'setup' ? 'today' : TAB);
+showTab(PRIMARY.includes(TAB) ? TAB : 'today');
 boot();
 setInterval(() => { if (dayKey() !== TODAY) location.reload(); }, 60000);
 })();
