@@ -41,6 +41,27 @@ then set these variables on the host:
 | `LITESTREAM_REGION` | `auto` (R2) · `us-west-004` (B2) · your AWS region | optional, defaults to `auto` |
 | `LITESTREAM_PATH` | `ledger` | optional path prefix inside the bucket, defaults to `ledger` |
 
+## AI Reports
+
+The Reports tab has two live, editable report bubbles — **Daily** and **Weekly** — written
+in short, natural, boss-readable paragraphs (no bullet lists, no corporate filler; it's
+told explicitly not to invent accomplishments). Claude only ever sees a data digest built
+from your clients/queue/waiting/log, never anything you didn't actually log. Requires:
+
+| Variable | Example | Notes |
+|---|---|---|
+| `ANTHROPIC_API_KEY` | `sk-ant-...` | from [console.anthropic.com](https://console.anthropic.com). Without it the Update button shows a clear "not configured" message instead of failing — nothing else in the app is affected. |
+| `REPORT_MODEL` | `claude-sonnet-5` | optional, this is the default |
+
+**Daily** updates itself in the background a few seconds after you complete a task, close a
+client request, resolve a waiting item, or check off an onboarding step — no need to click
+anything. **Weekly** is update-on-click only (Update button). Click into either bubble's
+text to edit it directly, like a chat message — once you've touched a day's draft, the
+background auto-update leaves it alone until you explicitly click **Update** again (which
+always overwrites with a fresh draft). Reports live in the same SQLite file as everything
+else, so they're covered by the Litestream backups above with no extra setup. Export is
+**Copy** (clipboard) or **Print / Save as PDF** via the browser's print dialog — no DOCX.
+
 Leave `LITESTREAM_BUCKET` unset and the app just runs without off-host backup (fine for local Docker).
 
 **Restore by hand** (e.g. to a new host or to inspect a backup):

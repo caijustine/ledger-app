@@ -16,6 +16,7 @@ Last verified: 2026-09-03.
 | Cloudflare SSL mode | currently **Full** — should be **Full (strict)** (see one-time tasks) |
 | Off-site backups | **Litestream → Cloudflare R2 bucket `ledger-backups`, prefix `ledger/`** — running |
 | Railway env vars | `EDIT_KEY`, `TZ=America/Denver`, `LITESTREAM_BUCKET`, `LITESTREAM_ENDPOINT`, `LITESTREAM_ACCESS_KEY_ID`, `LITESTREAM_SECRET_ACCESS_KEY`, `LITESTREAM_REGION` |
+| AI Reports | `ANTHROPIC_API_KEY` added to Railway — **not yet confirmed working** (variable name/service/environment unverified). Check the Deploy Logs boot line: it ends `ai reports configured` or `ai reports NOT configured`. If the Update button in the Reports tab still 503s ("not configured"), the var is missing, misnamed, or on the wrong service/environment — see README → AI Reports. |
 
 ## Routine
 

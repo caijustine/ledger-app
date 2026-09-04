@@ -271,6 +271,29 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 .glance{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;margin-bottom:8px}
 .glance b{color:var(--ink)}
 
+/* AI reports — chat-style, editable */
+.repbubble{background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;padding:14px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
+.repbubble-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.repbubble-title{font-family:var(--font-display);font-weight:700;font-size:14.5px}
+.repbubble-meta{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-left:6px}
+.repbubble-actions{display:flex;gap:6px;flex-wrap:wrap}
+.repbubble-text{width:100%;min-height:100px;resize:vertical;background:var(--sunk);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;font-family:var(--font-body);font-size:14px;line-height:1.6;color:var(--ink)}
+.repbubble-text:focus{background:var(--surface)}
+.repbubble-text::placeholder{color:var(--faint)}
+.repbubble .hint{margin:8px 0 0}
+.rephist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.rephist button{background:transparent;border:1px solid var(--rule);border-radius:12px;padding:3px 10px;font-size:11.5px;font-family:var(--font-mono);color:var(--muted)}
+.rephist button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.rephist button:hover{background:var(--accent-soft)}
+@media print{
+  body *{visibility:hidden}
+  #printArea:not([hidden]),#printArea:not([hidden]) *{visibility:visible}
+  #printArea{position:absolute;top:0;left:0;width:100%;background:#fff;color:#1c1f2b;padding:20px;font-family:var(--font-body)}
+  #printArea h1{font-family:var(--font-display);font-size:20px;margin:0 0 4px;color:#1c1f2b}
+  #printArea .report-meta{color:#666;font-size:12px;font-family:var(--font-mono);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #1c1f2b}
+  #printArea p{white-space:pre-wrap;line-height:1.6;margin:0 0 10px}
+}
+
 .qa{position:relative}
 .qa-panel{position:absolute;top:calc(100% + 6px);right:0;width:340px;max-width:86vw;background:var(--surface);border:1px solid var(--rule-strong);border-radius:8px;box-shadow:var(--shadow);z-index:45;padding:12px}
 .qa-types{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px}
@@ -283,6 +306,7 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 @media (max-width:760px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .cp-grid{grid-template-columns:1fr}
+  .repbubble-head{align-items:flex-start}
   .crow{grid-template-columns:1fr 14px 66px;grid-template-areas:"name health last" "biz biz biz" "next next next";row-gap:3px}
   .crow .cname{grid-area:name}.crow .cbiz{grid-area:biz}.crow .dot{grid-area:health}.crow .cnext{grid-area:next}.crow .clast{grid-area:last}
   .search input{width:120px}
@@ -403,23 +427,58 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
   </section>
 
   <section id="reports" data-tab="reports">
-    <div class="sechead"><h2>Reports</h2><div class="meta">Rolling 7 days · client health</div></div>
-    <div class="glance" id="glance"></div>
-    <div class="sub-h">Week</div>
-    <div class="week"><table id="weekTable"></table></div>
-    <div class="sub-h">Previous days</div>
-    <div class="hint" id="histMeta"></div>
-    <div id="histList" class="days"></div>
-    <div id="histDay" hidden>
-      <button class="btn ghost small" id="histBack" style="margin-bottom:10px">← All days</button>
-      <div class="dayhead"><h3 id="histTitle"></h3><span id="histSummary" class="mono" style="font-size:12.5px;color:var(--muted)"></span></div>
-      <div class="sub-h" style="margin-top:0">Standing duties that day</div>
-      <div class="dutyline" id="histDuties"></div>
-      <div class="sub-h">Landed that day</div>
-      <div class="ledger" id="histLanded"></div>
-      <div class="sub-h">Everything logged, newest first</div>
-      <div class="ledger" id="histLog"></div>
+    <div class="sechead"><h2>Reports</h2><div class="meta">Written from what's actually logged</div></div>
+
+    <div class="repbubble rw" id="dailyBubble">
+      <div class="repbubble-head">
+        <div><span class="repbubble-title">Daily Report</span> <span class="repbubble-meta" id="dailyMeta"></span></div>
+        <div class="repbubble-actions">
+          <button class="btn ghost small" id="dailyPrint">Print</button>
+          <button class="btn ghost small" id="dailyCopy">Copy</button>
+          <button class="btn small" id="dailyUpdate">Update</button>
+        </div>
+      </div>
+      <textarea class="repbubble-text" id="dailyText" rows="5" placeholder="Complete a task or click Update to start today's report…"></textarea>
+      <div class="hint" id="dailyHint" hidden></div>
+      <div class="rephist" id="dailyHist"></div>
     </div>
+
+    <div class="repbubble rw" id="weeklyBubble">
+      <div class="repbubble-head">
+        <div><span class="repbubble-title">Weekly Report</span> <span class="repbubble-meta" id="weeklyMeta"></span></div>
+        <div class="repbubble-actions">
+          <button class="btn ghost small" id="weeklyPrint">Print</button>
+          <button class="btn ghost small" id="weeklyCopy">Copy</button>
+          <button class="btn small" id="weeklyUpdate">Update</button>
+        </div>
+      </div>
+      <textarea class="repbubble-text" id="weeklyText" rows="5" placeholder="Click Update to generate this week's report…"></textarea>
+      <div class="hint" id="weeklyHint" hidden></div>
+      <div class="rephist" id="weeklyHist"></div>
+    </div>
+
+    <details class="daily" id="reportsExtra">
+      <summary>Week &amp; history</summary>
+      <div class="daily-body">
+        <div class="sub-h" style="margin-top:8px">Client health at a glance</div>
+        <div class="glance" id="glance"></div>
+        <div class="sub-h">Week</div>
+        <div class="week"><table id="weekTable"></table></div>
+        <div class="sub-h">Previous days</div>
+        <div class="hint" id="histMeta"></div>
+        <div id="histList" class="days"></div>
+        <div id="histDay" hidden>
+          <button class="btn ghost small" id="histBack" style="margin-bottom:10px">← All days</button>
+          <div class="dayhead"><h3 id="histTitle"></h3><span id="histSummary" class="mono" style="font-size:12.5px;color:var(--muted)"></span></div>
+          <div class="sub-h" style="margin-top:0">Standing duties that day</div>
+          <div class="dutyline" id="histDuties"></div>
+          <div class="sub-h">Landed that day</div>
+          <div class="ledger" id="histLanded"></div>
+          <div class="sub-h">Everything logged, newest first</div>
+          <div class="ledger" id="histLog"></div>
+        </div>
+      </div>
+    </details>
   </section>
 
   <section id="waiting" data-tab="waiting">
@@ -458,6 +517,7 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 </div>
 <div class="toast" id="toast"></div>
 <datalist id="clientNames"></datalist>
+<div id="printArea" hidden></div>
 
 <script>
 (() => {
@@ -642,6 +702,7 @@ async function boot() {
     render();
     setStatus(readOnly ? 'ro' : 'saved', readOnly ? 'Read-only view' : (st.updatedAt ? 'Up to date · last save ' + fmtTime(st.updatedAt) : 'Up to date'));
     loadDays();
+    loadReportsTab();
   } catch (e) { setStatus('error', 'Could not reach the server'); console.error(e); }
 }
 document.getElementById('unlock').addEventListener('click', () => {
@@ -788,10 +849,10 @@ function computeObservations() {
 }
 
 // ---------- queue / waiting mutations (shared by Queue tab + client page) ----------
-function qDone(id) { const q = S.queue.find(x => x.id === id); if (q) { q.done = true; q.doneDay = TODAY; q.doneTs = new Date().toISOString(); } markDirty(); render(); }
+function qDone(id) { const q = S.queue.find(x => x.id === id); if (q) { q.done = true; q.doneDay = TODAY; q.doneTs = new Date().toISOString(); } markDirty(); render(); scheduleAutoReport(); }
 function qReopen(id) { const q = S.queue.find(x => x.id === id); if (q) { q.done = false; delete q.doneDay; delete q.doneTs; } markDirty(); render(); }
 function qRemove(id) { S.queue = S.queue.filter(x => x.id !== id); markDirty(); render(); }
-function wDone(id) { const w = S.waiting.find(x => x.id === id); if (w) { w.status = 'done'; w.doneAt = new Date().toISOString(); } markDirty(); render(); }
+function wDone(id) { const w = S.waiting.find(x => x.id === id); if (w) { w.status = 'done'; w.doneAt = new Date().toISOString(); } markDirty(); render(); scheduleAutoReport(); }
 function wReopen(id) { const w = S.waiting.find(x => x.id === id); if (w) { w.status = 'open'; w.doneAt = null; } markDirty(); render(); }
 function wRemove(id) { S.waiting = S.waiting.filter(x => x.id !== id); markDirty(); render(); }
 
@@ -819,6 +880,7 @@ function render() {
   renderSetup();
   renderHistory();
   renderGlance();
+  renderReportsTab();
 
   document.getElementById('tabQueueN').textContent = openQ.length || '';
   document.getElementById('tabClientsN').textContent = activeClients().length || '';
@@ -1239,7 +1301,10 @@ cbody.addEventListener('change', e => {
   if (cf === 'status') { c.status = e.target.value; c.archivedAt = c.status === 'archived' ? new Date().toISOString() : null; }
   else if (cf) c[cf] = e.target.value;
   else if (cf2) c.contact[cf2] = e.target.value;
-  else if (ob) { const o = c.onboarding.find(o => o.key === ob); if (o) { o.done = e.target.checked; o.doneAt = e.target.checked ? new Date().toISOString() : null; } }
+  else if (ob) {
+    const o = c.onboarding.find(o => o.key === ob);
+    if (o) { o.done = e.target.checked; o.doneAt = e.target.checked ? new Date().toISOString() : null; if (e.target.checked) scheduleAutoReport(); }
+  }
   else return;
   markDirty(); render();
 });
@@ -1417,6 +1482,109 @@ document.body.addEventListener('click', e => {
   const b = e.target.closest('[data-open-client]'); if (!b) return;
   e.preventDefault(); openClient(b.dataset.openClient);
 });
+// ---------- AI reports: two live, editable bubbles (daily auto-updates as work is completed) ----------
+let REPORTS = {daily:[], weekly:[]};      // history per type, newest period first
+let CURRENT = {daily:null, weekly:null};  // the row currently shown in each bubble
+let generating = {daily:false, weekly:false};
+let autoTimer = null;
+
+async function loadReportsTab() {
+  if (readOnly) return;
+  for (const type of ['daily', 'weekly']) {
+    try {
+      const j = await (await fetch('/api/reports?type=' + type, {headers: headers()})).json();
+      REPORTS[type] = j.reports || [];
+      if (!CURRENT[type] || !document.activeElement || document.activeElement.id !== type + 'Text') {
+        CURRENT[type] = REPORTS[type][0] || null; // most recent period for that type (today, for daily)
+      }
+    } catch (e) {}
+  }
+  renderReportsTab();
+}
+
+function renderBubble(type) {
+  const meta = document.getElementById(type + 'Meta'), text = document.getElementById(type + 'Text'), hist = document.getElementById(type + 'Hist');
+  const r = CURRENT[type];
+  if (document.activeElement !== text) text.value = r ? r.text : '';
+  meta.textContent = r ? `${r.periodStart === r.periodEnd ? fmtDateShort(r.periodStart) : fmtDateShort(r.periodStart) + '–' + fmtDateShort(r.periodEnd)} · updated ${fmtTime(r.updatedAt)}${r.edited ? ' · edited' : ''}` : '';
+  hist.innerHTML = REPORTS[type].slice(0, 10).map(row => `<button class="${r && r.id === row.id ? 'active' : ''}" data-load-report="${type}:${row.id}">${esc(fmtDateShort(row.periodStart))}</button>`).join('');
+}
+function renderReportsTab() { renderBubble('daily'); renderBubble('weekly'); }
+
+function showReportHint(type, msg) { const h = document.getElementById(type + 'Hint'); h.textContent = msg || 'AI reports need ANTHROPIC_API_KEY set on the server.'; h.hidden = false; }
+
+async function updateReport(type, opts) {
+  opts = opts || {};
+  if (readOnly || generating[type]) return;
+  generating[type] = true;
+  const btn = document.getElementById(type + 'Update');
+  if (!opts.silent) { btn.disabled = true; btn.textContent = 'Updating…'; document.getElementById(type + 'Hint').hidden = true; }
+  try {
+    const res = await fetch('/api/reports/generate', {method:'POST', headers:headers(), body:JSON.stringify({type, respectEdits: !!opts.respectEdits})});
+    const j = await res.json().catch(() => ({}));
+    if (res.status === 503) { if (!opts.silent) showReportHint(type, j.message); return; }
+    if (!res.ok) { if (!opts.silent) toast(j.message || 'Could not update the report.'); return; }
+    if (j.skipped) return; // an edited draft — left alone on purpose
+    REPORTS[type] = REPORTS[type].filter(r => r.id !== j.id);
+    REPORTS[type].unshift(j);
+    REPORTS[type].sort((a, b) => b.periodStart.localeCompare(a.periodStart));
+    CURRENT[type] = j;
+    renderBubble(type);
+  } catch (e) { if (!opts.silent) toast('Could not reach the server.'); }
+  finally { generating[type] = false; if (!opts.silent) { btn.disabled = false; btn.textContent = 'Update'; } }
+}
+// completing a task/request or an onboarding step nudges today's daily report forward —
+// debounced so a burst of completions costs one call, and it never touches a draft you've
+// already started editing (see respectEdits server-side)
+function scheduleAutoReport() {
+  if (readOnly) return;
+  clearTimeout(autoTimer);
+  autoTimer = setTimeout(() => updateReport('daily', {respectEdits: true, silent: true}), 12000);
+}
+
+document.getElementById('dailyUpdate').addEventListener('click', () => updateReport('daily'));
+document.getElementById('weeklyUpdate').addEventListener('click', () => updateReport('weekly'));
+
+function reportTextArea(type) {
+  document.getElementById(type + 'Text').addEventListener('change', async e => {
+    if (readOnly || !CURRENT[type]) return;
+    try {
+      const res = await fetch('/api/reports/' + CURRENT[type].id, {method:'PUT', headers:headers(), body:JSON.stringify({text: e.target.value})});
+      if (!res.ok) { toast('Could not save your edit.'); return; }
+      const j = await res.json();
+      CURRENT[type] = j; REPORTS[type] = REPORTS[type].map(r => r.id === j.id ? j : r);
+      renderBubble(type);
+    } catch (err) { toast('Could not reach the server.'); }
+  });
+}
+reportTextArea('daily'); reportTextArea('weekly');
+
+document.body.addEventListener('click', e => {
+  const b = e.target.closest('[data-load-report]'); if (!b) return;
+  const [type, id] = b.dataset.loadReport.split(':');
+  const row = REPORTS[type].find(r => String(r.id) === id); if (!row) return;
+  CURRENT[type] = row; renderBubble(type);
+});
+
+function printReport(type) {
+  const r = CURRENT[type], text = document.getElementById(type + 'Text').value;
+  if (!text.trim()) { toast('Nothing to print yet.'); return; }
+  const title = type === 'weekly' ? 'Weekly Report' : 'Daily Report';
+  const period = r ? (r.periodStart === r.periodEnd ? fmtDateLong(fromKey(r.periodStart)) : `${fmtDateShort(r.periodStart)} – ${fmtDateShort(r.periodEnd)}`) : '';
+  const area = document.getElementById('printArea');
+  area.innerHTML = `<h1>${esc(title)}</h1><div class="report-meta">${esc(period)}</div><p>${esc(text)}</p>`;
+  area.hidden = false; window.print(); area.hidden = true;
+}
+async function copyReport(type) {
+  const text = document.getElementById(type + 'Text').value;
+  if (!text.trim()) { toast('Nothing to copy yet.'); return; }
+  try { await navigator.clipboard.writeText(text); toast('Copied to clipboard.'); }
+  catch (e) { toast('Could not copy — try Print instead.'); }
+}
+document.getElementById('dailyPrint').addEventListener('click', () => printReport('daily'));
+document.getElementById('weeklyPrint').addEventListener('click', () => printReport('weekly'));
+document.getElementById('dailyCopy').addEventListener('click', () => copyReport('daily'));
+document.getElementById('weeklyCopy').addEventListener('click', () => copyReport('weekly'));
 
 // ---------- go ----------
 showTab(PRIMARY.includes(TAB) ? TAB : 'today');
