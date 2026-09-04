@@ -344,5 +344,21 @@ app.put('/api/reports/:id', requireEdit, (req, res) => {
   res.json(rowOut({ ...r, text, edited: 1, updated_at: now }));
 });
 
+// ===================== integrations =====================
+// Connection status only for now — no message ingestion or task creation yet.
+// Just confirms the bot token in SLACK_BOT_TOKEN is real and shows which workspace it's for.
+app.get('/api/integrations/slack', requireEdit, async (req, res) => {
+  const token = process.env.SLACK_BOT_TOKEN;
+  if (!token) return res.json({ connected: false, message: 'Set SLACK_BOT_TOKEN on the server to connect Slack.' });
+  try {
+    const r = await fetch('https://slack.com/api/auth.test', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    const j = await r.json();
+    if (!j.ok) return res.json({ connected: false, message: `Slack rejected the token: ${j.error || 'unknown error'}.` });
+    res.json({ connected: true, team: j.team, user: j.user });
+  } catch (e) {
+    res.json({ connected: false, message: 'Could not reach Slack — try again in a moment.' });
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
-app.listen(PORT, () => console.log(`Daily Work Ledger on http://localhost:${PORT}  (data: ${DATA_DIR}, edit key ${EDIT_KEY ? 'set' : 'NOT set — anyone can edit'}, ai reports ${process.env.ANTHROPIC_API_KEY ? 'configured' : 'NOT configured'})`));
+app.listen(PORT, () => console.log(`Daily Work Ledger on http://localhost:${PORT}  (data: ${DATA_DIR}, edit key ${EDIT_KEY ? 'set' : 'NOT set — anyone can edit'}, ai reports ${process.env.ANTHROPIC_API_KEY ? 'configured' : 'NOT configured'}, slack ${process.env.SLACK_BOT_TOKEN ? 'token set' : 'not configured'})`));

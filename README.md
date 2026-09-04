@@ -53,14 +53,28 @@ from your clients/queue/waiting/log, never anything you didn't actually log. Req
 | `ANTHROPIC_API_KEY` | `sk-ant-...` | from [console.anthropic.com](https://console.anthropic.com). Without it the Update button shows a clear "not configured" message instead of failing — nothing else in the app is affected. |
 | `REPORT_MODEL` | `claude-sonnet-5` | optional, this is the default |
 
-**Daily** updates itself in the background a few seconds after you complete a task, close a
-client request, resolve a waiting item, or check off an onboarding step — no need to click
-anything. **Weekly** is update-on-click only (Update button). Click into either bubble's
-text to edit it directly, like a chat message — once you've touched a day's draft, the
-background auto-update leaves it alone until you explicitly click **Update** again (which
-always overwrites with a fresh draft). Reports live in the same SQLite file as everything
-else, so they're covered by the Litestream backups above with no extra setup. Export is
-**Copy** (clipboard) or **Print / Save as PDF** via the browser's print dialog — no DOCX.
+**Daily** updates itself in the background a few seconds after anything gets logged — a
+duty tick, a tap-to-log action, a note, a completed task/request, a resolved waiting item,
+a checked-off onboarding step — no need to click anything. **Weekly** is update-on-click
+only (Update button). Click into either bubble's text to edit it directly, like a chat
+message — once you've touched a day's draft, the background auto-update leaves it alone
+until you explicitly click **Update** again (which always overwrites with a fresh draft).
+Reports live in the same SQLite file as everything else, so they're covered by the
+Litestream backups above with no extra setup. Export is **Copy** (clipboard) or
+**Print / Save as PDF** via the browser's print dialog — no DOCX.
+
+## Integrations (Setup → Integrations)
+
+Slack connection status only, for now — no live task ingestion yet, just confirms the bot
+token works so it's ready to build on:
+
+| Variable | Example | Notes |
+|---|---|---|
+| `SLACK_BOT_TOKEN` | `xoxb-...` | From a Slack App you create at [api.slack.com/apps](https://api.slack.com/apps) → **OAuth & Permissions** → add Bot Token Scopes (e.g. `channels:history`, `groups:history`, `im:history`, `users:read` — not used yet, but reasonable to add now for later) → **Install to Workspace** → copy the **Bot User OAuth Token**. Without it, Setup shows "Slack not connected" — nothing else is affected. |
+
+Skool has no public developer API as of 2026 (no docs, no key dashboard) — the only
+official option is Zapier on Skool's Pro plan, and that's not something this app can key
+into. There's nothing to wire up there yet.
 
 Leave `LITESTREAM_BUCKET` unset and the app just runs without off-host backup (fine for local Docker).
 

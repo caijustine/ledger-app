@@ -6,13 +6,12 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  --paper:#F7F3F1; --surface:#FFFFFF; --sunk:#F0EAEB; --ink:#363B52; --muted:#7A82A0; --faint:#A9AFC4;
-  --rule:#E6DFE3; --rule-strong:#CDC6D3;
-  --accent:#8599B8; --accent-ink:#FFFFFF; --accent-soft:#E6ECF6;
-  --good:#4E9C94; --good-soft:#DCEFEC; --warn:#E08A3C; --warn-soft:#FCE6D2; --crit:#D4736A; --crit-soft:#F9DFDB;
-  --slack:#C2678F; --slack-soft:#FBDDE8; --skool:#6F8EC2; --skool-soft:#E2ECF7;
-  --sunrise:linear-gradient(90deg,#92ABD3 0%,#E49C95 45%,#FAC098 75%,#8599B8 100%);
-  --shadow:0 1px 2px rgba(54,59,82,.06), 0 6px 20px -12px rgba(54,59,82,.28);
+  /* black & white, ChatGPT-ish — the only colors in the whole app are the status trio below */
+  --paper:#FFFFFF; --surface:#FFFFFF; --sunk:#F7F7F8; --ink:#111111; --muted:#6E6E80; --faint:#9B9B9B;
+  --rule:#E5E5E5; --rule-strong:#D1D1D1;
+  --accent:#111111; --accent-ink:#FFFFFF; --accent-soft:#F0F0F0;
+  --good:#2E7D32; --good-soft:#E7F3E8; --warn:#B45309; --warn-soft:#FBEEDD; --crit:#B91C1C; --crit-soft:#FBE7E7;
+  --shadow:0 1px 2px rgba(0,0,0,.05), 0 6px 20px -12px rgba(0,0,0,.18);
   --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
   --font-body:"IBM Plex Sans","Segoe UI",Helvetica,Arial,sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
@@ -20,29 +19,25 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#22263A; --surface:#2B3047; --sunk:#343953; --ink:#EEE8EA; --muted:#A9AFC8; --faint:#7D849F;
-    --rule:#3B415A; --rule-strong:#4F5675;
-    --accent:#92ABD3; --accent-ink:#1B1F30; --accent-soft:#35415F;
-    --good:#95C7C2; --good-soft:#2C4A48; --warn:#FAC098; --warn-soft:#4B3A2B; --crit:#E49C95; --crit-soft:#4E3234;
-    --slack:#F490B9; --slack-soft:#4A2F3E; --skool:#BEE4E7; --skool-soft:#2E4649;
-    --sunrise:linear-gradient(90deg,#92ABD3 0%,#E49C95 45%,#FAC098 75%,#8599B8 100%);
+    --paper:#1A1A1A; --surface:#212121; --sunk:#2A2A2A; --ink:#ECECEC; --muted:#A0A0A8; --faint:#707078;
+    --rule:#3A3A3A; --rule-strong:#4D4D4D;
+    --accent:#ECECEC; --accent-ink:#111111; --accent-soft:#333333;
+    --good:#7FBF83; --good-soft:#2A3A2B; --warn:#E0A868; --warn-soft:#3C2F20; --crit:#E58585; --crit-soft:#3C2626;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#22263A; --surface:#2B3047; --sunk:#343953; --ink:#EEE8EA; --muted:#A9AFC8; --faint:#7D849F;
-  --rule:#3B415A; --rule-strong:#4F5675;
-  --accent:#92ABD3; --accent-ink:#1B1F30; --accent-soft:#35415F;
-  --good:#95C7C2; --good-soft:#2C4A48; --warn:#FAC098; --warn-soft:#4B3A2B; --crit:#E49C95; --crit-soft:#4E3234;
-  --slack:#F490B9; --slack-soft:#4A2F3E; --skool:#BEE4E7; --skool-soft:#2E4649;
-  --sunrise:linear-gradient(90deg,#92ABD3 0%,#E49C95 45%,#FAC098 75%,#8599B8 100%);
+  --paper:#1A1A1A; --surface:#212121; --sunk:#2A2A2A; --ink:#ECECEC; --muted:#A0A0A8; --faint:#707078;
+  --rule:#3A3A3A; --rule-strong:#4D4D4D;
+  --accent:#ECECEC; --accent-ink:#111111; --accent-soft:#333333;
+  --good:#7FBF83; --good-soft:#2A3A2B; --warn:#E0A868; --warn-soft:#3C2F20; --crit:#E58585; --crit-soft:#3C2626;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   color-scheme:dark;
 }
 *{box-sizing:border-box}
 [hidden]{display:none !important}
-body{margin:0;background:var(--paper);border-top:4px solid transparent;border-image:var(--sunrise) 1;color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -113,8 +108,7 @@ input[type=date],input[type=time]{font-family:var(--font-mono);font-size:13px}
 .row:hover .x{opacity:1}
 .row.empty{color:var(--faint);font-style:italic;grid-template-columns:1fr}
 .chip{display:inline-block;font-family:var(--font-mono);font-size:11.5px;padding:1px 6px;border-radius:3px;background:var(--sunk);color:var(--muted);margin-right:6px;vertical-align:1px;white-space:nowrap}
-.chip.boss{background:var(--warn-soft);color:var(--warn)}
-.chip.slack{background:var(--slack-soft);color:var(--slack)} .chip.email{background:var(--accent-soft);color:var(--accent)} .chip.skool{background:var(--skool-soft);color:var(--skool)} .chip.self{background:var(--sunk);color:var(--muted)}
+/* source/category chips are informational, not status — all sit on the same neutral .chip style below */
 
 /* queue */
 .qform{display:grid;grid-template-columns:2fr 150px 130px 1fr 140px auto;gap:8px;margin-bottom:6px;align-items:center}
@@ -154,12 +148,13 @@ tr:last-child td{border-bottom:0}
 .settings{background:var(--surface);border:1px solid var(--rule);padding:14px 16px}
 .settings .rowset{display:grid;grid-template-columns:1fr 160px auto;gap:8px;align-items:center;padding:4px 0}
 .settings input[type=text]{width:100%}
+.introw{display:flex;align-items:center;gap:8px;font-size:13.5px}
 
 /* tabs */
 .tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule-strong);margin-top:18px;overflow-x:auto}
 .tab{background:transparent;border:0;border-bottom:3px solid transparent;padding:10px 14px 9px;font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--muted);white-space:nowrap;margin-bottom:-1px}
 .tab:hover{color:var(--ink)}
-.tab.active{color:var(--ink);border-bottom-color:var(--crit)}
+.tab.active{color:var(--ink);border-bottom-color:var(--ink)}
 .tab .cnt{font-family:var(--font-mono);font-weight:400;font-size:11.5px;margin-left:6px;color:var(--faint)}
 section[data-tab]{display:none;margin-top:24px}
 section[data-tab].active{display:block}
@@ -288,9 +283,9 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 @media print{
   body *{visibility:hidden}
   #printArea:not([hidden]),#printArea:not([hidden]) *{visibility:visible}
-  #printArea{position:absolute;top:0;left:0;width:100%;background:#fff;color:#1c1f2b;padding:20px;font-family:var(--font-body)}
-  #printArea h1{font-family:var(--font-display);font-size:20px;margin:0 0 4px;color:#1c1f2b}
-  #printArea .report-meta{color:#666;font-size:12px;font-family:var(--font-mono);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #1c1f2b}
+  #printArea{position:absolute;top:0;left:0;width:100%;background:#fff;color:#111111;padding:20px;font-family:var(--font-body)}
+  #printArea h1{font-family:var(--font-display);font-size:20px;margin:0 0 4px;color:#111111}
+  #printArea .report-meta{color:#666;font-size:12px;font-family:var(--font-mono);margin-bottom:16px;padding-bottom:10px;border-bottom:2px solid #111111}
   #printArea p{white-space:pre-wrap;line-height:1.6;margin:0 0 10px}
 }
 
@@ -511,6 +506,12 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
       <div id="tapRows"></div>
       <button class="btn small" id="addTap" style="margin-top:8px">+ Add action</button>
     </div>
+
+    <div class="sub-h">Integrations</div>
+    <div class="settings">
+      <div class="introw" id="slackStatus"><span class="dot neutral"></span><span>Checking Slack…</span></div>
+      <p class="hint" style="margin:8px 0 0">Connects a Slack bot token so it's ready for live tasks later — nothing is pulled in yet.</p>
+    </div>
   </section>
 
   <footer><span id="footLeft"></span><span id="footRight"></span></footer>
@@ -523,16 +524,17 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 (() => {
 'use strict';
 // ---------- categories (color-coded across queue and week) ----------
+// grayscale swatches — categories are distinguished by name, not hue; shade just adds texture
 const CATS = [
-  {id:'email', name:'Email', color:'#8599B8'},
-  {id:'skool', name:'Skool', color:'#6F8EC2'},
-  {id:'slack', name:'Slack / team', color:'#F490B9'},
-  {id:'sales', name:'Sales entry (sheet + CRM)', color:'#F49F51'},
-  {id:'payments', name:'Payments', color:'#E49C95'},
-  {id:'onboarding', name:'Onboarding', color:'#95C7C2'},
-  {id:'followup', name:'Client follow-up', color:'#92ABD3'},
-  {id:'gbp', name:'Google Business Profile', color:'#FAC098'},
-  {id:'other', name:'Other', color:'#A9AFC4'},
+  {id:'email', name:'Email', color:'#8A8A8A'},
+  {id:'skool', name:'Skool', color:'#6B6B6B'},
+  {id:'slack', name:'Slack / team', color:'#4D4D4D'},
+  {id:'sales', name:'Sales entry (sheet + CRM)', color:'#333333'},
+  {id:'payments', name:'Payments', color:'#8A8A8A'},
+  {id:'onboarding', name:'Onboarding', color:'#6B6B6B'},
+  {id:'followup', name:'Client follow-up', color:'#4D4D4D'},
+  {id:'gbp', name:'Google Business Profile', color:'#333333'},
+  {id:'other', name:'Other', color:'#B0B0B0'},
 ];
 const catById = Object.fromEntries(CATS.map(c => [c.id, c]));
 
@@ -703,6 +705,7 @@ async function boot() {
     setStatus(readOnly ? 'ro' : 'saved', readOnly ? 'Read-only view' : (st.updatedAt ? 'Up to date · last save ' + fmtTime(st.updatedAt) : 'Up to date'));
     loadDays();
     loadReportsTab();
+    loadSlackStatus();
   } catch (e) { setStatus('error', 'Could not reach the server'); console.error(e); }
 }
 document.getElementById('unlock').addEventListener('click', () => {
@@ -722,7 +725,7 @@ function toast(msg) { toastEl.textContent = msg; toastEl.classList.add('show'); 
 // ---------- log ----------
 // entry kinds: duty (checklist pass), tap (repeatable action), note, contact (client touch)
 function pushLog(kind, ref, text, clientId) { S.log.push({id:uid(), ts:new Date().toISOString(), day:TODAY, kind, ref:ref || null, text:text || '', clientId:clientId || null}); }
-function addLog(kind, ref, text, clientId) { pushLog(kind, ref, text, clientId); markDirty(); render(); }
+function addLog(kind, ref, text, clientId) { pushLog(kind, ref, text, clientId); markDirty(); render(); scheduleAutoReport(); }
 function removeLog(id) { S.log = S.log.filter(x => x.id !== id); markDirty(); render(); }
 const logLabel = x => {
   if (x.kind === 'duty') return (S.settings.duties.find(d => d.id === x.ref) || {}).name || x.text || 'Standing duty';
@@ -1111,6 +1114,18 @@ document.getElementById('addTap').addEventListener('click', () => { if (readOnly
 document.getElementById('setupBack').addEventListener('click', () => showTab(RETURN_TAB));
 document.getElementById('gear').addEventListener('click', () => goVirtual('setup'));
 
+// ---------- integrations ----------
+async function loadSlackStatus() {
+  if (readOnly) return;
+  const el = document.getElementById('slackStatus'); if (!el) return;
+  try {
+    const j = await (await fetch('/api/integrations/slack', {headers: headers()})).json();
+    el.innerHTML = j.connected
+      ? `<span class="dot green"></span><span>Connected to Slack — <b>${esc(j.team || 'workspace')}</b> as ${esc(j.user || 'bot')}</span>`
+      : `<span class="dot neutral"></span><span>${esc(j.message || 'Slack not connected.')}</span>`;
+  } catch (e) { el.innerHTML = '<span class="dot neutral"></span><span>Could not check Slack status.</span>'; }
+}
+
 // ---------- today: stats / priorities / noticed / recent ----------
 function renderStats() {
   const s = computeStats();
@@ -1203,7 +1218,7 @@ function wRow(w) {
     ? `resolved ${w.doneAt ? fmtDateShort(w.doneAt.slice(0, 10)) : ''}`
     : (w.due ? `${overdue ? 'overdue' : 'due'} ${fmtDateShort(w.due)}` : ageLabel(base));
   return `<div class="qrow ${w.status === 'done' ? 'done' : ''}">
-    <span class="cat" style="background:${w.type === 'call' ? 'var(--slack)' : 'var(--accent)'}"></span>
+    <span class="cat" style="background:var(--rule-strong)"></span>
     <div><div class="title">${esc(w.what)}${w.type === 'call' ? ' <span class="chip">call</span>' : ''}</div>
       <div class="src"><span class="chip">on ${esc(labelOn(w.on))}</span>${c ? clientChip(c.id) : ''}${w.notes ? ' · ' + esc(w.notes) : ''} · asked ${fmtDateShort(base)}</div></div>
     <span class="age ${overdue ? 'older' : ''}">${right}</span>
