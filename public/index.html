@@ -90,6 +90,8 @@ input[type=date],input[type=time]{font-family:var(--font-mono);font-size:13px}
 .counter{background:var(--surface);border-right:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:10px 12px;display:flex;flex-direction:column;gap:2px;min-height:64px}
 .counter .n{font-family:var(--font-display);font-size:26px;font-weight:600;font-variant-numeric:tabular-nums;line-height:1}
 .counter .k{font-size:11.5px;color:var(--muted);line-height:1.25}
+.taprow{margin-bottom:8px}
+.taprow input{width:280px;max-width:100%}
 .taps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:12px}
 .tap{background:var(--surface);border:1px solid var(--rule-strong);border-radius:6px;padding:10px 12px 9px;text-align:left;display:flex;flex-direction:column;gap:3px;transition:transform .08s ease,background .12s;box-shadow:var(--shadow);min-height:58px}
 .tap:hover{background:var(--accent-soft)}
@@ -367,6 +369,7 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
     <div class="sub-h" style="margin-top:0" id="dailySummary">Daily checklist — tap a box when it's done</div>
     <div class="checklist" id="checklist"></div>
     <div class="counters" id="counters"></div>
+    <div class="taprow rw"><input type="text" id="tapClient" list="clientNames" placeholder="Client for these taps (optional)" autocomplete="off" maxlength="120"></div>
     <div class="taps rw" id="taps"></div>
     <form class="noteform rw" id="noteform">
       <input type="text" id="noteInput" placeholder="Anything else you did — one line, logged with the time" maxlength="200" autocomplete="off">
@@ -603,6 +606,7 @@ const ONBOARDING_TEMPLATE = [
   ['domain', 'Domain information received'],
   ['social', 'Social accounts connected'],
   ['photo_link', 'Photo/video upload link sent'],
+  ['login_sent', 'Login credentials sent to client'],
   ['nfc_addr', 'NFC card address confirmed'],
   ['nfc_order', 'NFC card ordered'],
   ['skool', 'Skool invite sent'],
@@ -844,6 +848,13 @@ function clientTimeline(c) {
   return ev.filter(e => e.ts).sort((a, b) => b.ts.localeCompare(a.ts));
 }
 function clientChip(id) { if (!id) return ''; const c = clientById(id); return c ? ` <button class="ctag" data-open-client="${c.id}">${esc(c.name || 'client')}</button>` : ''; }
+// prefer a real linked client chip; for a tap logged with a typed name that didn't match
+// any client exactly, fall back to showing the plain text so it isn't silently dropped
+function logClientTag(x) {
+  if (x.clientId) return clientChip(x.clientId);
+  if (x.kind === 'tap' && x.text) return ` <span class="mono" style="color:var(--muted);font-size:11px">· ${esc(x.text)}</span>`;
+  return '';
+}
 
 // ---------- today: numbers, priorities, observations ----------
 function computeStats() {
@@ -942,7 +953,7 @@ function renderToday(dayLog, viewing, closedDay) {
     `<div class="counter"><div class="n">${counts[t.id]}</div><div class="k">${esc(t.name)}</div></div>`).join('') +
     `<div class="counter"><div class="n">${notes}</div><div class="k">Notes</div></div>`;
   document.getElementById('taps').innerHTML = S.settings.taps.map(t => `<button class="tap" data-tap="${t.id}"><span class="t">${esc(t.name)}</span><span class="s">tap to log · ${esc((catById[t.cat] || catById.other).name.toLowerCase())}</span></button>`).join('');
-  const rows = dayLog.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${clientChip(x.clientId)}`, id:x.id, rm:!viewing && x.kind !== undefined}))
+  const rows = dayLog.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${logClientTag(x)}`, id:x.id, rm:!viewing && x.kind !== undefined}))
     .concat(closedDay.map(q => ({ts:q.doneTs || (q.doneDay + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}${q.client ? ' <span style="color:var(--muted)">· ' + esc(q.client) + '</span>' : ''}`, id:null, rm:false})))
     .sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
   document.getElementById('todayLog').innerHTML = rows.length ? rows.map(r => `
@@ -953,9 +964,22 @@ document.getElementById('checklist').addEventListener('click', e => {
   const b = e.target.closest('[data-duty]'); if (!b || readOnly) return;
   addLog('duty', b.dataset.duty);
 });
+// "GBP optimized" is a soft-gated tap: it still logs, but warns if the client's onboarding
+// isn't actually ready for it yet (NFC card ordered, photo link sent, login credentials sent)
+function gbpReadinessWarning(clientId) {
+  if (!clientId) return null;
+  const c = clientById(clientId); if (!c) return null;
+  const step = key => (c.onboarding || []).find(o => o.key === key);
+  const missing = [
+    ['nfc_order', 'NFC card ordered'], ['photo_link', 'photo link sent'], ['login_sent', 'login credentials sent'],
+  ].filter(([key]) => !(step(key) || {}).done).map(([, label]) => label);
+  return missing.length ? `${c.name}: ${missing.join(', ')} not marked done yet — GBP optimized logged anyway.` : null;
+}
 document.getElementById('taps').addEventListener('click', e => {
   const b = e.target.closest('.tap'); if (!b || readOnly) return;
-  addLog('tap', b.dataset.tap);
+  const clientVal = document.getElementById('tapClient').value.trim(), clientId = resolveClientId(clientVal);
+  if (b.dataset.tap === 'gbp_opt') { const warn = gbpReadinessWarning(clientId); if (warn) toast(warn); }
+  addLog('tap', b.dataset.tap, clientVal, clientId);
   const nb = document.querySelector(`.tap[data-tap="${b.dataset.tap}"]`); if (nb) { nb.classList.add('flash'); setTimeout(() => nb.classList.remove('flash'), 350); }
 });
 document.getElementById('noteform').addEventListener('submit', e => {
@@ -1003,7 +1027,7 @@ function renderHistory() {
     document.getElementById('histDuties').innerHTML = S.settings.duties.map(d => { const n = sm.log.filter(x => x.kind === 'duty' && x.ref === d.id).length; return `<span class="${n ? 'ok' : ''}">${n ? '✓' : '✗'} ${esc(d.name)}${n > 1 ? ' ×' + n : ''}</span>`; }).join('');
     const landed = S.queue.filter(q => q.day === k);
     document.getElementById('histLanded').innerHTML = landed.length ? landed.map(qRow).join('') : `<div class="row empty">Nothing landed that day.</div>`;
-    const rows = sm.log.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${clientChip(x.clientId)}`}))
+    const rows = sm.log.map(x => ({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${logClientTag(x)}`}))
       .concat(S.queue.filter(q => q.done && q.doneDay === k).map(q => ({ts:q.doneTs || (k + 'T23:59:00'), html:`<span class="chip">closed</span>${esc(q.title)}${clientChip(q.clientId)}`})))
       .sort((a, b) => (b.ts || '').localeCompare(a.ts || ''));
     document.getElementById('histLog').innerHTML = rows.length ? rows.map(r => `<div class="row"><span class="ts">${fmtTime(r.ts)}</span><span>${r.html}</span><span></span></div>`).join('') : `<div class="row empty">No entries on record for this day.</div>`;
@@ -1265,7 +1289,7 @@ function relTime(iso) {
 }
 function renderRecent() {
   const ev = [];
-  S.log.slice(-40).forEach(x => ev.push({ts:x.ts, kind:logKind(x), text:`${esc(logLabel(x))}${clientChip(x.clientId)}`}));
+  S.log.slice(-40).forEach(x => ev.push({ts:x.ts, kind:logKind(x), text:`${esc(logLabel(x))}${logClientTag(x)}`}));
   S.queue.slice(-30).forEach(q => {
     if (q.ts) ev.push({ts:q.ts, kind:'task', text:`Queued: ${esc(q.title)}${clientChip(q.clientId)}`});
     if (q.done && q.doneTs) ev.push({ts:q.doneTs, kind:'closed', text:`Closed: ${esc(q.title)}${clientChip(q.clientId)}`});
