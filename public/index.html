@@ -477,6 +477,11 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
       <div class="ledger" id="outstandingList"></div>
     </div>
 
+    <div class="block">
+      <div class="sechead"><h2>Recent activity</h2><div class="meta"></div></div>
+      <div class="ledger notiflist" id="recentReports"></div>
+    </div>
+
     <details class="daily" id="reportsExtra">
       <summary>Week &amp; history</summary>
       <div class="daily-body">
@@ -1302,9 +1307,11 @@ function renderRecent() {
     if (r.updatedAt) ev.push({ts:r.updatedAt, kind:'report', text:`${type === 'weekly' ? 'Weekly' : 'Daily'} report ${r.edited ? 'edited' : 'updated'}`});
   }));
   const rows = ev.filter(e => e.ts).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 10);
-  document.getElementById('recent').innerHTML = rows.length
+  const inner = rows.length
     ? rows.map(r => `<div class="notif"><span class="nic">${NOTIF_ICON[r.kind] || '•'}</span><span class="ntext">${r.text}</span><span class="ntime">${relTime(r.ts)}</span></div>`).join('')
     : `<div class="row empty">Activity will show up here.</div>`;
+  // shown on both Today and Reports — same feed, same underlying data
+  ['recent', 'recentReports'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = inner; });
 }
 
 // ---------- clients ----------
