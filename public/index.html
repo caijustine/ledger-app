@@ -19,7 +19,7 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#171717; --surface:#2F2F2F; --sunk:#212121; --ink:#ECECEC; --muted:#B4B4B4; --faint:#8E8E8E;
+    --paper:rgb(3,0,0); --surface:#2F2F2F; --sunk:#212121; --ink:#ECECEC; --muted:#B4B4B4; --faint:#8E8E8E;
     --rule:#333333; --rule-strong:#4D4D4F;
     --accent:#FFFFFF; --accent-ink:#171717; --accent-soft:#2F2F2F;
     --good:#7FBF83; --good-soft:#2A3A2B; --warn:#E0A868; --warn-soft:#3C2F20; --crit:#E58585; --crit-soft:#3C2626;
@@ -28,7 +28,7 @@
   }
 }
 :root[data-theme="dark"]{
-  --paper:#171717; --surface:#2F2F2F; --sunk:#212121; --ink:#ECECEC; --muted:#B4B4B4; --faint:#8E8E8E;
+  --paper:rgb(3,0,0); --surface:#2F2F2F; --sunk:#212121; --ink:#ECECEC; --muted:#B4B4B4; --faint:#8E8E8E;
   --rule:#333333; --rule-strong:#4D4D4F;
   --accent:#FFFFFF; --accent-ink:#171717; --accent-soft:#2F2F2F;
   --good:#7FBF83; --good-soft:#2A3A2B; --warn:#E0A868; --warn-soft:#3C2F20; --crit:#E58585; --crit-soft:#3C2626;
@@ -205,11 +205,6 @@ footer{margin-top:48px;color:var(--faint);font-size:12px;font-family:var(--font-
 .block{margin-top:32px}
 .sechead.sm{border-bottom-width:1px;margin-bottom:10px}
 .sechead.sm h3{font-family:var(--font-display);font-size:14px;font-weight:600}
-.row.prio{grid-template-columns:74px 1fr 16px;cursor:pointer}
-.row.prio:hover{background:var(--accent-soft)}
-.row.prio .ts{text-transform:uppercase;font-size:11px;letter-spacing:.04em}
-.row.prio.over .ts{color:var(--crit)}
-.chev{color:var(--faint)}
 
 .noticed:not(:empty){margin-top:18px}
 .noticed-inner{background:var(--accent-soft);border:1px solid var(--rule-strong);border-left:3px solid var(--accent);border-radius:6px;padding:10px 14px}
@@ -263,6 +258,12 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 .cp-add{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
 .cp-add input[type=text]{flex:1;min-width:120px;margin:0}
 
+.notiflist{border-top:0}
+.notif{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--rule)}
+.notif .nic{width:24px;height:24px;border-radius:50%;background:var(--sunk);border:1px solid var(--rule-strong);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:var(--font-display);color:var(--muted);flex:none}
+.notif .ntext{flex:1;font-size:13.5px;min-width:0}
+.notif .ntime{font-family:var(--font-mono);font-size:11px;color:var(--faint);white-space:nowrap}
+.eodbanner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--warn-soft);border:1px solid var(--warn);color:var(--warn);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13.5px}
 .glance{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-family:var(--font-mono);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:6px;padding:10px 14px;margin-bottom:8px}
 .glance b{color:var(--ink)}
 
@@ -280,6 +281,13 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 .rephist button{background:transparent;border:1px solid var(--rule);border-radius:12px;padding:3px 10px;font-size:11.5px;font-family:var(--font-mono);color:var(--muted)}
 .rephist button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .rephist button:hover{background:var(--accent-soft)}
+.repbubble.collapsible{padding:0}
+.repbubble.collapsible>summary{cursor:pointer;list-style:none;padding:14px 16px;margin-bottom:0}
+.repbubble.collapsible>summary::-webkit-details-marker{display:none}
+.repbubble.collapsible>summary::before{content:"\25B8";color:var(--muted);margin-right:8px}
+.repbubble.collapsible[open]>summary::before{content:"\25BE"}
+.repbubble.collapsible>summary:hover{background:var(--sunk)}
+.repbubble.collapsible .repbubble-body{padding:0 16px 16px;border-top:1px solid var(--rule);padding-top:12px}
 @media print{
   body *{visibility:hidden}
   #printArea:not([hidden]),#printArea:not([hidden]) *{visibility:visible}
@@ -346,30 +354,30 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
   </nav>
 
   <section id="today" data-tab="today">
+    <div class="eodbanner rw" id="eodBanner" hidden>
+      <span id="eodText"></span>
+      <button class="btn ghost small" id="eodDismiss">Dismiss</button>
+    </div>
+    <div class="sub-h" style="margin-top:0" id="dailySummary">Daily checklist — tap a box when it's done</div>
+    <div class="checklist" id="checklist"></div>
+    <div class="counters" id="counters"></div>
+    <div class="taps rw" id="taps"></div>
+    <form class="noteform rw" id="noteform">
+      <input type="text" id="noteInput" placeholder="Anything else you did — one line, logged with the time" maxlength="200" autocomplete="off">
+      <button class="btn" type="submit">Log note</button>
+    </form>
+    <div class="ledger" id="todayLog"></div>
+
     <div class="stats" id="stats"></div>
     <div class="block">
       <div class="sechead"><h2>Today’s Priorities</h2><div class="meta" id="prioMeta"></div></div>
+      <p class="hint" style="margin:0 0 10px">Everything open in the Queue — check it off here or in Queue, same list.</p>
       <div class="ledger" id="priorities"></div>
     </div>
     <div class="noticed" id="noticed"></div>
-    <details class="daily" id="dailyWrap">
-      <summary id="dailySummary">Daily checklist</summary>
-      <div class="daily-body">
-        <div class="sub-h">Standing duties — tick each pass, every tick is timestamped</div>
-        <div class="checklist" id="checklist"></div>
-        <div class="sub-h">Logged actions</div>
-        <div class="counters" id="counters"></div>
-        <div class="taps rw" id="taps"></div>
-        <form class="noteform rw" id="noteform">
-          <input type="text" id="noteInput" placeholder="Anything else you did — one line, logged with the time" maxlength="200" autocomplete="off">
-          <button class="btn" type="submit">Log note</button>
-        </form>
-        <div class="ledger" id="todayLog"></div>
-      </div>
-    </details>
     <div class="block">
       <div class="sechead"><h2>Recent activity</h2><div class="meta"></div></div>
-      <div class="ledger" id="recent"></div>
+      <div class="ledger notiflist" id="recent"></div>
     </div>
   </section>
 
@@ -406,7 +414,7 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
         <button class="btn primary" type="submit">Add to queue</button>
       </div>
       <div class="qform2">
-        <input type="text" id="qClient" list="clientNames" placeholder="Client it concerns (optional)" maxlength="60" autocomplete="off">
+        <input type="text" id="qClient" list="clientNames" placeholder="Client it concerns (optional)" maxlength="200" autocomplete="off">
         <input type="date" id="qDue" title="Due date (optional)">
         <span style="font-size:12px;color:var(--muted)">← due date, optional</span>
       </div>
@@ -438,18 +446,30 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
       <div class="rephist" id="dailyHist"></div>
     </div>
 
-    <div class="repbubble rw" id="weeklyBubble">
-      <div class="repbubble-head">
+    <details class="repbubble collapsible rw" id="weeklyBubble">
+      <summary class="repbubble-head">
         <div><span class="repbubble-title">Weekly Report</span> <span class="repbubble-meta" id="weeklyMeta"></span></div>
+      </summary>
+      <div class="repbubble-body">
         <div class="repbubble-actions">
           <button class="btn ghost small" id="weeklyPrint">Print</button>
           <button class="btn ghost small" id="weeklyCopy">Copy</button>
           <button class="btn small" id="weeklyUpdate">Update</button>
         </div>
+        <textarea class="repbubble-text" id="weeklyText" rows="5" placeholder="Click Update to generate this week's report…"></textarea>
+        <div class="hint" id="weeklyHint" hidden></div>
+        <div class="rephist" id="weeklyHist"></div>
       </div>
-      <textarea class="repbubble-text" id="weeklyText" rows="5" placeholder="Click Update to generate this week's report…"></textarea>
-      <div class="hint" id="weeklyHint" hidden></div>
-      <div class="rephist" id="weeklyHist"></div>
+    </details>
+
+    <div class="block">
+      <div class="sechead"><h2>Still Need To Do</h2><div class="meta" id="outstandingMeta"></div></div>
+      <p class="hint">Duties not yet done today, plus everything open in the Queue — check any of it off here, or add something new.</p>
+      <form class="rw" id="outstandingAdd" style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="outstandingInput" placeholder="Add something outstanding…" maxlength="200" autocomplete="off" style="flex:1">
+        <button class="btn small" type="submit">Add</button>
+      </form>
+      <div class="ledger" id="outstandingList"></div>
     </div>
 
     <details class="daily" id="reportsExtra">
@@ -808,33 +828,10 @@ function computeStats() {
   return {overdue, dueToday, waiting: openW.length, calls: openW.filter(w => w.type === 'call' && w.due === TODAY).length};
 }
 const HR = {red:0, yellow:1, green:2, neutral:3};
-function computePriorities() {
-  const items = [];
-  S.queue.filter(q => !q.done && q.due && q.due <= TODAY).forEach(q => {
-    const c = q.clientId && clientById(q.clientId);
-    items.push({key:'q' + q.id, client: c ? c.name : (q.client || ''), text:q.title, overdue:q.due < TODAY, due:q.due,
-      health: c ? clientHealth(c).level : 'green', go: c ? () => openClient(c.id) : () => showTab('queue')});
-  });
-  activeClients().filter(c => c.nextAction.trim() && c.nextActionDue && c.nextActionDue <= TODAY).forEach(c => {
-    items.push({key:'c' + c.id, client:c.name, text:c.nextAction, overdue:c.nextActionDue < TODAY, due:c.nextActionDue,
-      health: clientHealth(c).level, go: () => openClient(c.id)});
-  });
-  S.waiting.filter(w => w.status === 'open' && w.type === 'call' && w.due && w.due <= TODAY).forEach(w => {
-    const c = w.clientId && clientById(w.clientId);
-    items.push({key:'w' + w.id, client: c ? c.name : '', text:'Call — ' + w.what, overdue:w.due < TODAY, due:w.due,
-      health:'green', go: c ? () => openClient(c.id) : () => goVirtual('waiting')});
-  });
-  items.sort((a, b) => (a.overdue === b.overdue ? 0 : a.overdue ? -1 : 1) || (a.due || '').localeCompare(b.due || '') || HR[a.health] - HR[b.health]);
-  let list = items.slice(0, 5);
-  if (list.length < 3) {
-    const have = new Set(list.map(i => i.key));
-    const extra = activeClients().filter(c => c.nextAction.trim() && !have.has('c' + c.id))
-      .sort((a, b) => (clientLastContacted(a) || '').localeCompare(clientLastContacted(b) || ''))
-      .slice(0, 3 - list.length)
-      .map(c => ({key:'c' + c.id, client:c.name, text:c.nextAction, overdue:false, due:c.nextActionDue || '', health:clientHealth(c).level, go: () => openClient(c.id)}));
-    list = list.concat(extra);
-  }
-  return list;
+// urgency order for "everything in the queue": overdue first, then due today, then soonest due, then no due date (oldest landed first)
+function queueUrgency(q) {
+  const rank = !q.due ? 3 : q.due < TODAY ? 0 : q.due === TODAY ? 1 : 2;
+  return [rank, q.due || '9999', q.day || ''];
 }
 function computeObservations() {
   const ac = activeClients(), out = [];
@@ -883,7 +880,9 @@ function render() {
   renderSetup();
   renderHistory();
   renderGlance();
+  renderOutstanding();
   renderReportsTab();
+  renderEndOfDayCheck();
 
   document.getElementById('tabQueueN').textContent = openQ.length || '';
   document.getElementById('tabClientsN').textContent = activeClients().length || '';
@@ -1137,20 +1136,22 @@ document.getElementById('stats').addEventListener('click', e => {
   if (b.dataset.stat === 'Waiting' || b.dataset.stat === 'Calls') goVirtual('waiting'); else showTab('queue');
 });
 
-let PRIO = [];
+// "Today's Priorities" is a live view of the whole open Queue — same rows, same
+// Done/Reopen/Remove actions as the Queue tab, just sorted most-urgent first.
 function renderPriorities() {
-  PRIO = computePriorities();
-  document.getElementById('prioMeta').textContent = PRIO.length ? '' : 'nothing pressing';
-  document.getElementById('priorities').innerHTML = PRIO.length ? PRIO.map(p => `
-    <div class="row prio ${p.overdue ? 'over' : ''}" data-prio="${p.key}">
-      <span class="ts">${p.overdue ? 'overdue' : (p.due === TODAY ? 'today' : (p.due ? fmtDateShort(p.due) : 'soon'))}</span>
-      <span>${p.client ? '<b>' + esc(p.client) + '</b> — ' : ''}${esc(p.text)}</span>
-      <span class="chev">›</span>
-    </div>`).join('') : `<div class="row empty">Nothing urgent right now. Nice.</div>`;
+  const list = S.queue.filter(q => !q.done).sort((a, b) => {
+    const ra = queueUrgency(a), rb = queueUrgency(b);
+    return ra[0] - rb[0] || ra[1].localeCompare(rb[1]) || ra[2].localeCompare(rb[2]);
+  });
+  document.getElementById('prioMeta').textContent = list.length ? `${list.length} open` : '';
+  document.getElementById('priorities').innerHTML = list.length ? list.map(qRow).join('') : `<div class="row empty">Nothing in the queue. Nice.</div>`;
 }
 document.getElementById('priorities').addEventListener('click', e => {
-  const r = e.target.closest('[data-prio]'); if (!r) return;
-  const it = PRIO.find(p => p.key === r.dataset.prio); if (it && it.go) it.go();
+  if (readOnly) return;
+  const d = e.target.closest('[data-q-done]'), r = e.target.closest('[data-q-reopen]'), x = e.target.closest('[data-q-rm]');
+  if (d) qDone(d.dataset.qDone);
+  else if (r) qReopen(r.dataset.qReopen);
+  else if (x) qRemove(x.dataset.qRm);
 });
 
 function renderNoticed() {
@@ -1159,21 +1160,56 @@ function renderNoticed() {
     ? `<div class="noticed-inner"><span class="nlabel">AI noticed</span><ul>${obs.map(o => `<li>${esc(o.text)}</li>`).join('')}</ul></div>` : '';
 }
 
+// end-of-day check: after 6:30pm local time, nudge if any "email" duty is still untapped today.
+// In-page only (a browser tab has to be open to see it) — dismissible per day.
+function renderEndOfDayCheck() {
+  const banner = document.getElementById('eodBanner'); if (!banner || readOnly) { if (banner) banner.hidden = true; return; }
+  const now = new Date();
+  const afterCutoff = now.getHours() > 18 || (now.getHours() === 18 && now.getMinutes() >= 30);
+  const emailDuties = S.settings.duties.filter(d => d.cat === 'email');
+  const doneToday = new Set(S.log.filter(x => x.kind === 'duty' && x.day === TODAY).map(x => x.ref));
+  const pending = emailDuties.filter(d => !doneToday.has(d.id));
+  let dismissed = false;
+  try { dismissed = localStorage.getItem('ledger-eod-dismissed') === TODAY; } catch (e) {}
+  if (!afterCutoff || !pending.length || dismissed) { banner.hidden = true; return; }
+  document.getElementById('eodText').textContent = `It's after 6:30 — ${pending.length} email check${pending.length === 1 ? '' : 's'} still not done today: ${pending.map(d => d.name).join(', ')}.`;
+  banner.hidden = false;
+}
+document.getElementById('eodDismiss').addEventListener('click', () => {
+  try { localStorage.setItem('ledger-eod-dismissed', TODAY); } catch (e) {}
+  document.getElementById('eodBanner').hidden = true;
+});
+
+// notification-style feed: anything that happened — logged, queued, closed, waited on,
+// resolved, or a report updating — newest first, relative time, like a notification center
+const NOTIF_ICON = {duty:'D', tap:'A', note:'N', contact:'C', task:'T', closed:'✓', waiting:'W', done:'✓', report:'R'};
+function relTime(iso) {
+  const s = Math.round((Date.now() - new Date(iso).getTime()) / 1000);
+  if (!isFinite(s)) return '';
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  return fmtDateShort(iso.slice(0, 10));
+}
 function renderRecent() {
   const ev = [];
-  S.log.slice(-40).forEach(x => ev.push({ts:x.ts, html:`<span class="chip ${esc(logCat(x))}">${logKind(x)}</span>${esc(logLabel(x))}${clientChip(x.clientId)}`}));
-  S.queue.filter(q => q.done).slice(-20).forEach(q => ev.push({ts:q.doneTs, html:`<span class="chip">closed</span>${esc(q.title)}${clientChip(q.clientId)}`}));
-  S.waiting.filter(w => w.status === 'done').slice(-20).forEach(w => ev.push({ts:w.doneAt, html:`<span class="chip">resolved</span>${esc(w.what)}${clientChip(w.clientId)}`}));
-  const rows = ev.filter(e => e.ts).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 8);
+  S.log.slice(-40).forEach(x => ev.push({ts:x.ts, kind:logKind(x), text:`${esc(logLabel(x))}${clientChip(x.clientId)}`}));
+  S.queue.slice(-30).forEach(q => {
+    if (q.ts) ev.push({ts:q.ts, kind:'task', text:`Queued: ${esc(q.title)}${clientChip(q.clientId)}`});
+    if (q.done && q.doneTs) ev.push({ts:q.doneTs, kind:'closed', text:`Closed: ${esc(q.title)}${clientChip(q.clientId)}`});
+  });
+  S.waiting.slice(-30).forEach(w => {
+    if (w.createdAt) ev.push({ts:w.createdAt, kind:'waiting', text:`Waiting on ${esc(labelOn(w.on))}: ${esc(w.what)}${clientChip(w.clientId)}`});
+    if (w.status === 'done' && w.doneAt) ev.push({ts:w.doneAt, kind:'done', text:`Resolved: ${esc(w.what)}${clientChip(w.clientId)}`});
+  });
+  ['daily', 'weekly'].forEach(type => (REPORTS[type] || []).forEach(r => {
+    if (r.updatedAt) ev.push({ts:r.updatedAt, kind:'report', text:`${type === 'weekly' ? 'Weekly' : 'Daily'} report ${r.edited ? 'edited' : 'updated'}`});
+  }));
+  const rows = ev.filter(e => e.ts).sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, 10);
   document.getElementById('recent').innerHTML = rows.length
-    ? rows.map(r => `<div class="row"><span class="ts">${fmtDateShort(r.ts.slice(0, 10))} ${fmtTime(r.ts)}</span><span>${r.html}</span><span></span></div>`).join('')
+    ? rows.map(r => `<div class="notif"><span class="nic">${NOTIF_ICON[r.kind] || '•'}</span><span class="ntext">${r.text}</span><span class="ntime">${relTime(r.ts)}</span></div>`).join('')
     : `<div class="row empty">Activity will show up here.</div>`;
 }
-
-// dailychecklist open-state
-const dailyWrap = document.getElementById('dailyWrap');
-try { if (localStorage.getItem('ledger-daily-open') === '1') dailyWrap.open = true; } catch (e) {}
-dailyWrap.addEventListener('toggle', () => { try { localStorage.setItem('ledger-daily-open', dailyWrap.open ? '1' : '0'); } catch (e) {} });
 
 // ---------- clients ----------
 let CURRENT_CLIENT = null;
@@ -1391,6 +1427,42 @@ function renderGlance() {
     `<span><b>${or}</b> open requests</span><span><b>${ow}</b> waiting</span>`;
 }
 
+// ---------- outstanding: duties not done today + everything open in the Queue, in one place ----------
+function outstandingRow(item) {
+  if (!item.isDuty) return qRow(item);
+  return `<div class="qrow">
+    <span class="cat" style="background:var(--rule-strong)"></span>
+    <div><div class="title">${esc(item.title)}</div><div class="src"><span class="chip">duty</span>not done today</div></div>
+    <span class="age"></span>
+    <span><button class="btn small rw" data-duty-done="${item.dutyId}">Done</button></span>
+  </div>`;
+}
+function renderOutstanding() {
+  const list = document.getElementById('outstandingList'); if (!list) return;
+  const doneToday = new Set(S.log.filter(x => x.kind === 'duty' && x.day === TODAY).map(x => x.ref));
+  const dutyItems = S.settings.duties.filter(d => !doneToday.has(d.id)).map(d => ({isDuty:true, dutyId:d.id, title:d.name}));
+  const queueItems = S.queue.filter(q => !q.done).sort((a, b) => {
+    const ra = queueUrgency(a), rb = queueUrgency(b);
+    return ra[0] - rb[0] || ra[1].localeCompare(rb[1]) || ra[2].localeCompare(rb[2]);
+  });
+  const all = dutyItems.concat(queueItems);
+  document.getElementById('outstandingMeta').textContent = all.length ? `${all.length} outstanding` : '';
+  list.innerHTML = all.length ? all.map(outstandingRow).join('') : `<div class="row empty">Nothing outstanding. Nice.</div>`;
+}
+document.getElementById('outstandingList').addEventListener('click', e => {
+  if (readOnly) return;
+  const dd = e.target.closest('[data-duty-done]'); if (dd) { addLog('duty', dd.dataset.dutyDone); return; }
+  const d = e.target.closest('[data-q-done]'), r = e.target.closest('[data-q-reopen]'), x = e.target.closest('[data-q-rm]');
+  if (d) qDone(d.dataset.qDone); else if (r) qReopen(r.dataset.qReopen); else if (x) qRemove(x.dataset.qRm);
+});
+document.getElementById('outstandingAdd').addEventListener('submit', e => {
+  e.preventDefault(); if (readOnly) return;
+  const inp = document.getElementById('outstandingInput'), v = inp.value.trim(); if (!v) return;
+  S.queue.push({id:uid(), title:v, cat:'other', source:'self', by:'', client:'', clientId:null, due:'', day:TODAY, ts:new Date().toISOString(), done:false});
+  inp.value = '';
+  markDirty(); render(); scheduleAutoReport();
+});
+
 // ---------- quick add (inline panel under "+ Add") ----------
 let QA_TYPE = 'task';
 const qaPanel = document.getElementById('qaPanel'), quickAddBtn = document.getElementById('quickAdd');
@@ -1514,6 +1586,7 @@ async function loadReportsTab() {
     } catch (e) {}
   }
   renderReportsTab();
+  renderRecent();
 }
 
 function renderBubble(type) {
@@ -1603,7 +1676,7 @@ document.getElementById('weeklyCopy').addEventListener('click', () => copyReport
 // ---------- go ----------
 showTab(PRIMARY.includes(TAB) ? TAB : 'reports');
 boot();
-setInterval(() => { if (dayKey() !== TODAY) location.reload(); }, 60000);
+setInterval(() => { if (dayKey() !== TODAY) location.reload(); else renderEndOfDayCheck(); }, 60000);
 })();
 </script>
 </body></html>
