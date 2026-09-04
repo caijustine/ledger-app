@@ -6,10 +6,10 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 :root{
-  /* black & white, ChatGPT-ish — the only colors in the whole app are the status trio below */
-  --paper:#FFFFFF; --surface:#FFFFFF; --sunk:#F7F7F8; --ink:#111111; --muted:#6E6E80; --faint:#9B9B9B;
-  --rule:#E5E5E5; --rule-strong:#D1D1D1;
-  --accent:#111111; --accent-ink:#FFFFFF; --accent-soft:#F0F0F0;
+  /* black & white, chatgpt.com-matched — the only colors anywhere are the status trio below */
+  --paper:#FFFFFF; --surface:#FFFFFF; --sunk:#F7F7F8; --ink:#0D0D0D; --muted:#5D5D5D; --faint:#8E8E8E;
+  --rule:#E5E5E5; --rule-strong:#D9D9D9;
+  --accent:#0D0D0D; --accent-ink:#FFFFFF; --accent-soft:#F0F0F0;
   --good:#2E7D32; --good-soft:#E7F3E8; --warn:#B45309; --warn-soft:#FBEEDD; --crit:#B91C1C; --crit-soft:#FBE7E7;
   --shadow:0 1px 2px rgba(0,0,0,.05), 0 6px 20px -12px rgba(0,0,0,.18);
   --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
@@ -19,18 +19,18 @@
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#1A1A1A; --surface:#212121; --sunk:#2A2A2A; --ink:#ECECEC; --muted:#A0A0A8; --faint:#707078;
-    --rule:#3A3A3A; --rule-strong:#4D4D4D;
-    --accent:#ECECEC; --accent-ink:#111111; --accent-soft:#333333;
+    --paper:#171717; --surface:#2F2F2F; --sunk:#212121; --ink:#ECECEC; --muted:#B4B4B4; --faint:#8E8E8E;
+    --rule:#333333; --rule-strong:#4D4D4F;
+    --accent:#FFFFFF; --accent-ink:#171717; --accent-soft:#2F2F2F;
     --good:#7FBF83; --good-soft:#2A3A2B; --warn:#E0A868; --warn-soft:#3C2F20; --crit:#E58585; --crit-soft:#3C2626;
     --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#1A1A1A; --surface:#212121; --sunk:#2A2A2A; --ink:#ECECEC; --muted:#A0A0A8; --faint:#707078;
-  --rule:#3A3A3A; --rule-strong:#4D4D4D;
-  --accent:#ECECEC; --accent-ink:#111111; --accent-soft:#333333;
+  --paper:#171717; --surface:#2F2F2F; --sunk:#212121; --ink:#ECECEC; --muted:#B4B4B4; --faint:#8E8E8E;
+  --rule:#333333; --rule-strong:#4D4D4F;
+  --accent:#FFFFFF; --accent-ink:#171717; --accent-soft:#2F2F2F;
   --good:#7FBF83; --good-soft:#2A3A2B; --warn:#E0A868; --warn-soft:#3C2F20; --crit:#E58585; --crit-soft:#3C2626;
   --shadow:0 1px 2px rgba(0,0,0,.4), 0 8px 24px -12px rgba(0,0,0,.6);
   color-scheme:dark;
@@ -339,13 +339,13 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
   </header>
 
   <nav class="tabs" id="tabs">
-    <button class="tab active" data-go="today">Today</button>
+    <button class="tab active" data-go="reports">Reports</button>
+    <button class="tab" data-go="today">Today</button>
     <button class="tab" data-go="clients">Clients<span class="cnt" id="tabClientsN"></span></button>
     <button class="tab" data-go="queue">Queue<span class="cnt" id="tabQueueN"></span></button>
-    <button class="tab" data-go="reports">Reports</button>
   </nav>
 
-  <section id="today" data-tab="today" class="active">
+  <section id="today" data-tab="today">
     <div class="stats" id="stats"></div>
     <div class="block">
       <div class="sechead"><h2>Today’s Priorities</h2><div class="meta" id="prioMeta"></div></div>
@@ -421,7 +421,7 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
     <details class="closed" id="closedWrap"><summary id="closedSummary">Closed</summary><div class="ledger" id="queueClosed"></div></details>
   </section>
 
-  <section id="reports" data-tab="reports">
+  <section id="reports" data-tab="reports" class="active">
     <div class="sechead"><h2>Reports</h2><div class="meta">Written from what's actually logged</div></div>
 
     <div class="repbubble rw" id="dailyBubble">
@@ -936,15 +936,14 @@ document.getElementById('noteform').addEventListener('submit', e => {
 document.getElementById('todayLog').addEventListener('click', e => { const b = e.target.closest('[data-rm-log]'); if (b && !readOnly) removeLog(b.dataset.rmLog); });
 
 // ---------- tabs ----------
-const PRIMARY = ['today', 'clients', 'queue', 'reports'];
-let TAB = 'today', RETURN_TAB = 'clients';
-try { const t = localStorage.getItem('ledger-tab'); if (t && PRIMARY.includes(t)) TAB = t; } catch (e) {}
+// Reports is always the landing tab — no "remember last tab" persistence, by design.
+const PRIMARY = ['reports', 'today', 'clients', 'queue'];
+let TAB = 'reports', RETURN_TAB = 'clients';
 function showTab(id) {
   TAB = id;
   const hi = id === 'client' ? 'clients' : id === 'waiting' ? 'today' : id === 'setup' ? '' : id;
   document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.dataset.go === hi));
   document.querySelectorAll('section[data-tab]').forEach(sec => sec.classList.toggle('active', sec.dataset.tab === id));
-  if (PRIMARY.includes(id)) { try { localStorage.setItem('ledger-tab', id); } catch (e) {} }
   window.scrollTo({top:0});
   render();
 }
@@ -1602,7 +1601,7 @@ document.getElementById('dailyCopy').addEventListener('click', () => copyReport(
 document.getElementById('weeklyCopy').addEventListener('click', () => copyReport('weekly'));
 
 // ---------- go ----------
-showTab(PRIMARY.includes(TAB) ? TAB : 'today');
+showTab(PRIMARY.includes(TAB) ? TAB : 'reports');
 boot();
 setInterval(() => { if (dayKey() !== TODAY) location.reload(); }, 60000);
 })();
