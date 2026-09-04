@@ -268,26 +268,29 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
 .glance b{color:var(--ink)}
 
 /* AI reports — chat-style, editable */
-.repbubble{background:var(--surface);border:1px solid var(--rule-strong);border-radius:10px;padding:14px 16px;margin-bottom:18px;box-shadow:var(--shadow)}
-.repbubble-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:8px}
-.repbubble-title{font-family:var(--font-display);font-weight:700;font-size:14.5px}
-.repbubble-meta{font-family:var(--font-mono);font-size:11.5px;color:var(--muted);margin-left:6px}
-.repbubble-actions{display:flex;gap:6px;flex-wrap:wrap}
-.repbubble-text{width:100%;min-height:100px;resize:vertical;background:var(--sunk);border:1px solid var(--rule);border-radius:8px;padding:12px 14px;font-family:var(--font-body);font-size:14px;line-height:1.6;color:var(--ink)}
-.repbubble-text:focus{background:var(--surface)}
+/* styled like a ChatGPT-mobile assistant answer: no card/box, text just flows on the
+   page, a quiet label above it, a slim row of ghost icon-actions below — not a form */
+.repbubble{margin-bottom:32px}
+.repbubble-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.repbubble-title{font-family:var(--font-display);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+.repbubble-meta{font-family:var(--font-mono);font-size:11px;color:var(--faint)}
+.repbubble-text{display:block;width:100%;background:transparent;border:1px solid transparent;border-radius:8px;margin:0 0 6px -10px;padding:4px 10px;font-family:var(--font-body);font-size:15.5px;line-height:1.75;color:var(--ink);resize:none;overflow:hidden;white-space:pre-wrap}
+.repbubble-text:hover{background:var(--sunk)}
+.repbubble-text:focus{background:var(--sunk);border-color:var(--rule)}
 .repbubble-text::placeholder{color:var(--faint)}
-.repbubble .hint{margin:8px 0 0}
+.repbubble .hint{margin:0 0 8px}
+.repbubble-actions{display:flex;gap:2px;flex-wrap:wrap}
+.repbubble-actions .btn{padding:5px 10px}
 .rephist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
 .rephist button{background:transparent;border:1px solid var(--rule);border-radius:12px;padding:3px 10px;font-size:11.5px;font-family:var(--font-mono);color:var(--muted)}
 .rephist button.active{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .rephist button:hover{background:var(--accent-soft)}
-.repbubble.collapsible{padding:0}
-.repbubble.collapsible>summary{cursor:pointer;list-style:none;padding:14px 16px;margin-bottom:0}
+.repbubble.collapsible{border-bottom:1px solid var(--rule);padding-bottom:18px}
+.repbubble.collapsible>summary{cursor:pointer;list-style:none;margin-bottom:0}
 .repbubble.collapsible>summary::-webkit-details-marker{display:none}
-.repbubble.collapsible>summary::before{content:"\25B8";color:var(--muted);margin-right:8px}
+.repbubble.collapsible>summary::before{content:"\25B8";color:var(--muted);margin-right:8px;font-size:11px}
 .repbubble.collapsible[open]>summary::before{content:"\25BE"}
-.repbubble.collapsible>summary:hover{background:var(--sunk)}
-.repbubble.collapsible .repbubble-body{padding:0 16px 16px;border-top:1px solid var(--rule);padding-top:12px}
+.repbubble.collapsible .repbubble-body{margin-top:8px}
 @media print{
   body *{visibility:hidden}
   #printArea:not([hidden]),#printArea:not([hidden]) *{visibility:visible}
@@ -433,31 +436,27 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
     <div class="sechead"><h2>Reports</h2><div class="meta">Written from what's actually logged</div></div>
 
     <div class="repbubble rw" id="dailyBubble">
-      <div class="repbubble-head">
-        <div><span class="repbubble-title">Daily Report</span> <span class="repbubble-meta" id="dailyMeta"></span></div>
-        <div class="repbubble-actions">
-          <button class="btn ghost small" id="dailyPrint">Print</button>
-          <button class="btn ghost small" id="dailyCopy">Copy</button>
-          <button class="btn small" id="dailyUpdate">Update</button>
-        </div>
-      </div>
-      <textarea class="repbubble-text" id="dailyText" rows="5" placeholder="Complete a task or click Update to start today's report…"></textarea>
+      <div class="repbubble-head"><span class="repbubble-title">Daily Report</span><span class="repbubble-meta" id="dailyMeta"></span></div>
+      <textarea class="repbubble-text" id="dailyText" rows="1" placeholder="Complete a task or tap Update to start today's report…"></textarea>
       <div class="hint" id="dailyHint" hidden></div>
+      <div class="repbubble-actions">
+        <button class="btn ghost small" id="dailyUpdate">Update</button>
+        <button class="btn ghost small" id="dailyCopy">Copy</button>
+        <button class="btn ghost small" id="dailyPrint">Print</button>
+      </div>
       <div class="rephist" id="dailyHist"></div>
     </div>
 
     <details class="repbubble collapsible rw" id="weeklyBubble">
-      <summary class="repbubble-head">
-        <div><span class="repbubble-title">Weekly Report</span> <span class="repbubble-meta" id="weeklyMeta"></span></div>
-      </summary>
+      <summary class="repbubble-head"><span class="repbubble-title">Weekly Report</span><span class="repbubble-meta" id="weeklyMeta"></span></summary>
       <div class="repbubble-body">
-        <div class="repbubble-actions">
-          <button class="btn ghost small" id="weeklyPrint">Print</button>
-          <button class="btn ghost small" id="weeklyCopy">Copy</button>
-          <button class="btn small" id="weeklyUpdate">Update</button>
-        </div>
-        <textarea class="repbubble-text" id="weeklyText" rows="5" placeholder="Click Update to generate this week's report…"></textarea>
+        <textarea class="repbubble-text" id="weeklyText" rows="1" placeholder="Tap Update to generate this week's report…"></textarea>
         <div class="hint" id="weeklyHint" hidden></div>
+        <div class="repbubble-actions">
+          <button class="btn ghost small" id="weeklyUpdate">Update</button>
+          <button class="btn ghost small" id="weeklyCopy">Copy</button>
+          <button class="btn ghost small" id="weeklyPrint">Print</button>
+        </div>
         <div class="rephist" id="weeklyHist"></div>
       </div>
     </details>
@@ -1589,10 +1588,13 @@ async function loadReportsTab() {
   renderRecent();
 }
 
+// grows a textarea to fit its content instead of scrolling — reads like flowing
+// message text rather than a boxed form field
+function autosize(el) { el.style.height = 'auto'; el.style.height = el.scrollHeight + 'px'; }
 function renderBubble(type) {
   const meta = document.getElementById(type + 'Meta'), text = document.getElementById(type + 'Text'), hist = document.getElementById(type + 'Hist');
   const r = CURRENT[type];
-  if (document.activeElement !== text) text.value = r ? r.text : '';
+  if (document.activeElement !== text) { text.value = r ? r.text : ''; autosize(text); }
   meta.textContent = r ? `${r.periodStart === r.periodEnd ? fmtDateShort(r.periodStart) : fmtDateShort(r.periodStart) + '–' + fmtDateShort(r.periodEnd)} · updated ${fmtTime(r.updatedAt)}${r.edited ? ' · edited' : ''}` : '';
   hist.innerHTML = REPORTS[type].slice(0, 10).map(row => `<button class="${r && r.id === row.id ? 'active' : ''}" data-load-report="${type}:${row.id}">${esc(fmtDateShort(row.periodStart))}</button>`).join('');
 }
@@ -1633,6 +1635,7 @@ document.getElementById('dailyUpdate').addEventListener('click', () => updateRep
 document.getElementById('weeklyUpdate').addEventListener('click', () => updateReport('weekly'));
 
 function reportTextArea(type) {
+  document.getElementById(type + 'Text').addEventListener('input', e => autosize(e.target));
   document.getElementById(type + 'Text').addEventListener('change', async e => {
     if (readOnly || !CURRENT[type]) return;
     try {
@@ -1645,6 +1648,9 @@ function reportTextArea(type) {
   });
 }
 reportTextArea('daily'); reportTextArea('weekly');
+// collapsed <details> lay out their content at height 0, so the weekly textarea's
+// autosize needs to re-run once it's actually visible
+document.getElementById('weeklyBubble').addEventListener('toggle', e => { if (e.target.open) autosize(document.getElementById('weeklyText')); });
 
 document.body.addEventListener('click', e => {
   const b = e.target.closest('[data-load-report]'); if (!b) return;
