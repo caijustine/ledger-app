@@ -125,6 +125,9 @@ input[type=date],input[type=time]{font-family:var(--font-mono);font-size:13px}
 .qrow .cat{width:4px;align-self:stretch;border-radius:2px;background:var(--rule-strong)}
 .qrow .due{font-family:var(--font-mono);font-size:11.5px}
 .qrow .due.over{color:var(--crit);font-weight:600} .qrow .due.today{color:var(--warn);font-weight:600}
+.qdetail{font-size:12.5px;color:var(--muted);margin-top:4px;white-space:pre-wrap;line-height:1.4}
+.qreply{grid-column:1 / -1;display:flex;gap:8px;margin-top:8px}
+.qreply input{flex:1}
 details.closed{margin-top:14px}
 details.closed summary{cursor:pointer;color:var(--muted);font-size:13px;font-family:var(--font-display);font-weight:600;letter-spacing:.04em}
 
@@ -529,7 +532,15 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
     <div class="sub-h">Integrations</div>
     <div class="settings">
       <div class="introw" id="slackStatus"><span class="dot neutral"></span><span>Checking Slack…</span></div>
-      <p class="hint" style="margin:8px 0 0">Connects a Slack bot token so it's ready for live tasks later — nothing is pulled in yet.</p>
+      <p class="hint" style="margin:8px 0 0">A message in one of these channels lands in the Queue automatically. DMs to the bot always create a "Reply" task, no rule needed. The bot has to be invited into each channel first (<code>/invite @yourbot</code>).</p>
+      <div id="slackRuleRows" style="margin-top:10px"></div>
+      <div class="rowset" style="grid-template-columns:1fr 160px 1fr auto">
+        <input type="text" id="slackRuleChannel" placeholder="channel name (no #)" maxlength="80">
+        <select id="slackRuleCat"></select>
+        <input type="text" id="slackRuleTitle" placeholder="Task title, e.g. &quot;New sale — add to CRM&quot;" maxlength="160">
+        <button class="btn small" id="slackRuleAdd">+ Add rule</button>
+      </div>
+      <div class="hint" id="slackRuleHint" hidden style="margin:8px 0 0"></div>
     </div>
   </section>
 
@@ -602,20 +613,31 @@ const ONBOARDING_TEMPLATE = [
 ].map(([key, label]) => ({key, label}));
 
 // ---------- state ----------
-let S = {v:3, settings:{duties:DEFAULT_DUTIES, taps:DEFAULT_TAPS}, log:[], queue:[], clients:[], waiting:[]};
+let S = {v:3, settings:{duties:DEFAULT_DUTIES, taps:DEFAULT_TAPS, slackRules:[]}, log:[], queue:[], clients:[], waiting:[]};
 function normalize(s) {
   s = s || {};
   s.v = 3; s.settings = s.settings || {};
   if (!Array.isArray(s.settings.duties)) s.settings.duties = DEFAULT_DUTIES.map(d => ({...d}));
   if (!Array.isArray(s.settings.taps)) s.settings.taps = DEFAULT_TAPS.map(d => ({...d}));
+  if (!Array.isArray(s.settings.slackRules)) s.settings.slackRules = [];
+  s.settings.slackRules = s.settings.slackRules.filter(r => r && r.channelId).map(r => ({
+    id: r.id || uid(), channelName: r.channelName || '', channelId: r.channelId,
+    cat: CATS.some(c => c.id === r.cat) ? r.cat : 'other', title: r.title || 'Slack task',
+  }));
   s.log = s.log || []; s.queue = s.queue || [];
   s.clients = Array.isArray(s.clients) ? s.clients : [];
   s.waiting = Array.isArray(s.waiting) ? s.waiting : [];
   // rename the placeholder email duties if they were never customized
   const OLD = {em1:'Email — account 1', em2:'Email — account 2', em3:'Email — account 3'};
   s.settings.duties.forEach(d => { if (OLD[d.id] && d.name === OLD[d.id]) d.name = DEFAULT_DUTIES.find(x => x.id === d.id).name; });
-  // migrate v1 queue items
-  s.queue.forEach(q => { if (!q.cat) q.cat = 'other'; if (q.source === 'assigned') q.source = 'boss'; if (q.source === 'recurring') q.source = 'self'; if (!('clientId' in q)) q.clientId = null; });
+  // migrate v1 queue items; backfill Slack-origin fields (harmless on non-Slack items)
+  s.queue.forEach(q => {
+    if (!q.cat) q.cat = 'other'; if (q.source === 'assigned') q.source = 'boss'; if (q.source === 'recurring') q.source = 'self';
+    if (!('clientId' in q)) q.clientId = null;
+    if (typeof q.detail !== 'string') q.detail = '';
+    if (!('slackChannelId' in q)) q.slackChannelId = null;
+    if (!('slackChannelType' in q)) q.slackChannelType = null;
+  });
   // clients
   s.clients.forEach(c => {
     c.id = c.id || uid();
@@ -709,6 +731,15 @@ async function save() {
   }
 }
 window.addEventListener('beforeunload', e => { if (dirty) { e.preventDefault(); e.returnValue = ''; } });
+// picks up server-originated changes (Slack-created tasks) in an already-open tab — only
+// when there's nothing unsaved locally, so it can never clobber an in-progress edit
+async function pollForRemoteChanges() {
+  if (dirty || saving || readOnly) return;
+  try {
+    const st = await (await fetch('/api/state', {headers: headers()})).json();
+    if (st.updatedAt && st.updatedAt !== baseVersion) { S = normalize(st.state); baseVersion = st.updatedAt; render(); loadDays(); }
+  } catch (e) {}
+}
 async function boot() {
   try {
     const me = await (await fetch('/api/me', { headers: headers() })).json();
@@ -877,6 +908,7 @@ function render() {
   renderWaiting();
   renderWeek();
   renderSetup();
+  renderSlackRules();
   renderHistory();
   renderGlance();
   renderOutstanding();
@@ -989,22 +1021,29 @@ document.getElementById('histBack').addEventListener('click', () => { HIST_DAY =
 // ---------- queue ----------
 const SRC_LABEL = {boss:'from a boss', slack:'from Slack', email:'from email', skool:'from Skool', client:'client request', self:'self-assigned'};
 function ageLabel(day) { const n = daysBetween(day, TODAY); return n <= 0 ? 'landed today' : n === 1 ? 'open 1 day' : `open ${n} days`; }
+let REPLY_OPEN = new Set();
 function qRow(q) {
   const n = daysBetween(q.day, TODAY);
   const ageCls = n >= 7 ? 'older' : n >= 3 ? 'old' : '';
   const cat = catById[q.cat] || catById.other;
   const who = q.by ? ` · ${esc(q.by)}` : '';
   const src = `<span class="chip ${esc(q.source)}">${esc(SRC_LABEL[q.source] || q.source)}</span>${esc(cat.name)}${who} · landed ${fmtDateShort(q.day)}${q.ts ? ' ' + fmtTime(q.ts) : ''}${q.clientId ? clientChip(q.clientId) : (q.client ? ' · <strong>' + esc(q.client) + '</strong>' : '')}`;
+  const detailLine = q.detail ? `<div class="qdetail">${esc(q.detail)}</div>` : '';
   let due = '';
   if (q.due && !q.done) { const d = daysBetween(TODAY, q.due); due = `<div class="due ${d < 0 ? 'over' : d === 0 ? 'today' : ''}">${d < 0 ? `overdue ${-d}d` : d === 0 ? 'due today' : `due ${fmtDateShort(q.due)}`}</div>`; }
   const right = q.done ? `closed ${fmtDateShort(q.doneDay)} ${q.doneTs ? fmtTime(q.doneTs) : ''}` : ageLabel(q.day);
+  const canReply = q.slackChannelType === 'im' && !q.done;
+  const replyBtn = canReply ? `<button class="btn ghost small rw" data-reply-toggle="${q.id}">Reply</button>` : '';
+  const replyRow = (canReply && REPLY_OPEN.has(q.id))
+    ? `<div class="qreply rw"><input type="text" data-reply-input maxlength="2000" placeholder="Type a reply…" autocomplete="off"><button class="btn small" data-reply-send="${q.id}">Send</button></div>` : '';
   return `<div class="qrow ${q.done ? 'done' : ''}">
     <span class="cat" style="background:${cat.color}"></span>
-    <div><div class="title">${esc(q.title)}</div><div class="src">${src}</div></div>
+    <div><div class="title">${esc(q.title)}</div><div class="src">${src}</div>${detailLine}</div>
     <span class="age ${q.done ? '' : ageCls}">${right}${due}</span>
-    <span>${q.done
+    <span>${replyBtn}${q.done
       ? `<button class="btn ghost small rw" data-q-reopen="${q.id}">Reopen</button>`
       : `<button class="btn small rw" data-q-done="${q.id}">Done</button> <button class="btn ghost small rw" data-q-rm="${q.id}" title="Remove">×</button>`}</span>
+    ${replyRow}
   </div>`;
 }
 function renderQueue(openQ) {
@@ -1122,6 +1161,40 @@ async function loadSlackStatus() {
       : `<span class="dot neutral"></span><span>${esc(j.message || 'Slack not connected.')}</span>`;
   } catch (e) { el.innerHTML = '<span class="dot neutral"></span><span>Could not check Slack status.</span>'; }
 }
+
+function renderSlackRules() {
+  const rows = document.getElementById('slackRuleRows'), catSel = document.getElementById('slackRuleCat');
+  if (!rows) return;
+  if (!catSel.childElementCount) catSel.innerHTML = CATS.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  rows.innerHTML = (S.settings.slackRules || []).map(r => `<div class="rowset" style="grid-template-columns:1fr 160px 1fr auto">
+    <span class="mono">#${esc(r.channelName || r.channelId)}</span>
+    <span>${esc((catById[r.cat] || catById.other).name)}</span>
+    <span>${esc(r.title)}</span>
+    <button class="btn ghost small" data-rm-slack-rule="${r.id}" title="Remove">×</button>
+  </div>`).join('') || '<p class="hint" style="margin:0">No channel rules yet — add one below.</p>';
+}
+function slackRuleHint(msg) { const h = document.getElementById('slackRuleHint'); h.textContent = msg; h.hidden = !msg; }
+document.getElementById('slackRuleAdd').addEventListener('click', async () => {
+  if (readOnly) return;
+  const chEl = document.getElementById('slackRuleChannel'), titleEl = document.getElementById('slackRuleTitle');
+  const channelName = chEl.value.trim().replace(/^#/, ''), cat = document.getElementById('slackRuleCat').value, title = titleEl.value.trim();
+  if (!channelName || !title) { slackRuleHint('Enter a channel name and a task title.'); return; }
+  slackRuleHint('Looking up the channel…');
+  try {
+    const res = await fetch('/api/integrations/slack/resolve-channel', {method:'POST', headers:headers(), body:JSON.stringify({channelName})});
+    const j = await res.json().catch(() => ({}));
+    if (!j.ok) { slackRuleHint(j.message || 'Could not find that channel.'); return; }
+    S.settings.slackRules.push({id:uid(), channelName, channelId:j.channelId, cat, title});
+    chEl.value = ''; titleEl.value = ''; slackRuleHint('');
+    markDirty(); render();
+  } catch (e) { slackRuleHint('Could not reach the server.'); }
+});
+document.getElementById('slackRuleRows').addEventListener('click', e => {
+  if (readOnly) return;
+  const rm = e.target.closest('[data-rm-slack-rule]'); if (!rm) return;
+  S.settings.slackRules = S.settings.slackRules.filter(r => r.id !== rm.dataset.rmSlackRule);
+  markDirty(); render();
+});
 
 // ---------- today: stats / priorities / noticed / recent ----------
 function renderStats() {
@@ -1567,6 +1640,33 @@ document.body.addEventListener('click', e => {
   const b = e.target.closest('[data-open-client]'); if (!b) return;
   e.preventDefault(); openClient(b.dataset.openClient);
 });
+
+// Slack DM reply — works from any list that renders qRow (Today, Queue, Reports' Outstanding)
+document.body.addEventListener('click', e => {
+  if (readOnly) return;
+  const t = e.target.closest('[data-reply-toggle]');
+  if (t) { const id = t.dataset.replyToggle; REPLY_OPEN.has(id) ? REPLY_OPEN.delete(id) : REPLY_OPEN.add(id); render(); return; }
+  const s = e.target.closest('[data-reply-send]');
+  if (s) { const row = s.closest('.qrow'), input = row && row.querySelector('[data-reply-input]'); sendSlackReply(s.dataset.replySend, input ? input.value.trim() : ''); }
+});
+document.body.addEventListener('keydown', e => {
+  const input = e.target.closest('[data-reply-input]'); if (!input || e.key !== 'Enter' || readOnly) return;
+  e.preventDefault();
+  const row = input.closest('.qrow'), btn = row && row.querySelector('[data-reply-send]');
+  if (btn) sendSlackReply(btn.dataset.replySend, input.value.trim());
+});
+async function sendSlackReply(id, text) {
+  if (readOnly || !text) return;
+  try {
+    const res = await fetch('/api/slack/reply', {method:'POST', headers:headers(), body:JSON.stringify({queueItemId:id, text})});
+    const j = await res.json().catch(() => ({}));
+    if (!res.ok) { toast(j.message || 'Could not send the reply.'); return; }
+    REPLY_OPEN.delete(id);
+    const q = S.queue.find(x => x.id === id); if (q) { q.done = true; q.doneDay = TODAY; q.doneTs = new Date().toISOString(); }
+    if (j.updatedAt) baseVersion = j.updatedAt; // the server already saved this — avoid a false 409 on the next unrelated save
+    toast('Sent.'); render();
+  } catch (e) { toast('Could not reach the server.'); }
+}
 // ---------- AI reports: two live, editable bubbles (daily auto-updates as work is completed) ----------
 let REPORTS = {daily:[], weekly:[]};      // history per type, newest period first
 let CURRENT = {daily:null, weekly:null};  // the row currently shown in each bubble
@@ -1682,7 +1782,7 @@ document.getElementById('weeklyCopy').addEventListener('click', () => copyReport
 // ---------- go ----------
 showTab(PRIMARY.includes(TAB) ? TAB : 'reports');
 boot();
-setInterval(() => { if (dayKey() !== TODAY) location.reload(); else renderEndOfDayCheck(); }, 60000);
+setInterval(() => { if (dayKey() !== TODAY) location.reload(); else { renderEndOfDayCheck(); pollForRemoteChanges(); } }, 60000);
 })();
 </script>
 </body></html>

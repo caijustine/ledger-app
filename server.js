@@ -21,6 +21,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS snapshots (day TEXT PRIMARY KEY, json TEXT NOT NULL, saved_at TEXT NOT NULL, saves INTEGER NOT NULL DEFAULT 1);
   CREATE TABLE IF NOT EXISTS events    (id INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, day TEXT NOT NULL, kind TEXT NOT NULL, detail TEXT NOT NULL);
   CREATE TABLE IF NOT EXISTS reports   (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT NOT NULL, period_start TEXT NOT NULL, period_end TEXT NOT NULL, generated_at TEXT NOT NULL, updated_at TEXT NOT NULL, model TEXT NOT NULL, digest_json TEXT NOT NULL, text TEXT NOT NULL, edited INTEGER NOT NULL DEFAULT 0, UNIQUE(type, period_start, period_end));
+  CREATE TABLE IF NOT EXISTS slack_events (event_id TEXT PRIMARY KEY, received_at TEXT NOT NULL);
 `);
 
 const EMPTY = { v: 3, settings: {}, log: [], queue: [], clients: [], waiting: [] };
@@ -32,7 +33,8 @@ const todayKey = () => {
 const getState = () => { const r = db.prepare('SELECT json, updated_at FROM state WHERE id = 1').get(); return r ? { state: JSON.parse(r.json), updatedAt: r.updated_at } : { state: EMPTY, updatedAt: null }; };
 
 const app = express();
-app.use(express.json({ limit: '10mb' }));
+// keep the raw bytes too — the Slack webhook has to verify its signature over the exact body
+app.use(express.json({ limit: '10mb', verify: (req, res, buf) => { req.rawBody = buf; } }));
 app.use((req, res, next) => { res.setHeader('Cache-Control', 'no-store'); next(); });
 
 // constant-time key comparison so a leaked link can't be brute-forced by timing
@@ -344,20 +346,172 @@ app.put('/api/reports/:id', requireEdit, (req, res) => {
   res.json(rowOut({ ...r, text, edited: 1, updated_at: now }));
 });
 
-// ===================== integrations =====================
-// Connection status only for now — no message ingestion or task creation yet.
-// Just confirms the bot token in SLACK_BOT_TOKEN is real and shows which workspace it's for.
-app.get('/api/integrations/slack', requireEdit, async (req, res) => {
+// ===================== integrations: Slack =====================
+// Channel rules live in the state blob (S.settings.slackRules) — user-editable config,
+// same reasoning as duties/taps: autosaved, snapshotted, Litestream-backed for free.
+// Queue items themselves keep the client/queue/waiting schema untouched except for three
+// new optional fields (detail, slackChannelId, slackChannelType) normalize()'d client-side.
+
+async function slackApi(method, params) {
   const token = process.env.SLACK_BOT_TOKEN;
-  if (!token) return res.json({ connected: false, message: 'Set SLACK_BOT_TOKEN on the server to connect Slack.' });
+  if (!token) { const e = new Error('SLACK_BOT_TOKEN not set'); e.code = 'not_configured'; throw e; }
+  const res = await fetch(`https://slack.com/api/${method}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json; charset=utf-8' },
+    body: JSON.stringify(params || {}),
+  });
+  const j = await res.json();
+  if (!j.ok) { const e = new Error(j.error || 'slack_error'); e.code = 'slack_error'; e.slackError = j.error; throw e; }
+  return j;
+}
+
+// constant-time HMAC check on the exact bytes Slack signed — same idiom as keyMatches()
+// above. This endpoint has no x-edit-key guard (Slack can't send one); this is its auth.
+function verifySlackSignature(req) {
+  const secret = process.env.SLACK_SIGNING_SECRET;
+  const ts = req.get('X-Slack-Request-Timestamp'), sig = req.get('X-Slack-Signature');
+  if (!secret || !ts || !sig || !req.rawBody) return false;
+  if (Math.abs(Date.now() / 1000 - Number(ts)) > 300) return false; // reject anything older than 5 minutes (replay protection)
+  const hmac = 'v0=' + crypto.createHmac('sha256', secret).update(`v0:${ts}:${req.rawBody}`).digest('hex');
+  const a = Buffer.from(hmac), b = Buffer.from(sig);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+let teamDomainCache = null;
+async function getTeamDomain() {
+  if (teamDomainCache) return teamDomainCache;
+  try { const j = await slackApi('team.info', {}); teamDomainCache = (j.team && j.team.domain) || null; } catch (e) {}
+  return teamDomainCache;
+}
+const slackPermalink = (domain, channel, ts) => domain ? `https://${domain}.slack.com/archives/${channel}/p${ts.replace('.', '')}` : null;
+
+const userNameCache = new Map();
+async function slackUserName(userId) {
+  if (!userId) return 'someone';
+  if (userNameCache.has(userId)) return userNameCache.get(userId);
   try {
-    const r = await fetch('https://slack.com/api/auth.test', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
-    const j = await r.json();
-    if (!j.ok) return res.json({ connected: false, message: `Slack rejected the token: ${j.error || 'unknown error'}.` });
+    const j = await slackApi('users.info', { user: userId });
+    const name = (j.user && (j.user.real_name || j.user.name)) || userId;
+    userNameCache.set(userId, name);
+    return name;
+  } catch (e) { return userId; }
+}
+
+// server-side writer, independent of the browser's PUT /api/state — an open tab just sees
+// this as "changed on another device" and the existing x-base-version 409 path handles it.
+function writeState(mutateFn, auditText) {
+  const current = getState();
+  const next = mutateFn(JSON.parse(JSON.stringify(current.state)));
+  const now = new Date().toISOString(), day = todayKey(), json = JSON.stringify(next);
+  db.exec('BEGIN');
+  try {
+    db.prepare('INSERT INTO state (id, json, updated_at) VALUES (1, ?, ?) ON CONFLICT(id) DO UPDATE SET json = excluded.json, updated_at = excluded.updated_at').run(json, now);
+    db.prepare('INSERT INTO snapshots (day, json, saved_at, saves) VALUES (?, ?, ?, 1) ON CONFLICT(day) DO UPDATE SET json = excluded.json, saved_at = excluded.saved_at, saves = saves + 1').run(day, json, now);
+    if (auditText) db.prepare('INSERT INTO events (at, day, kind, detail) VALUES (?, ?, ?, ?)').run(now, day, 'slack', auditText);
+    db.exec('COMMIT');
+  } catch (e) { db.exec('ROLLBACK'); throw e; }
+  return { state: next, updatedAt: now };
+}
+
+// connection status — confirms the bot token is real and shows which workspace it's for
+app.get('/api/integrations/slack', requireEdit, async (req, res) => {
+  try {
+    const j = await slackApi('auth.test', {});
     res.json({ connected: true, team: j.team, user: j.user });
   } catch (e) {
-    res.json({ connected: false, message: 'Could not reach Slack — try again in a moment.' });
+    if (e.code === 'not_configured') return res.json({ connected: false, message: 'Set SLACK_BOT_TOKEN on the server to connect Slack.' });
+    res.json({ connected: false, message: e.slackError ? `Slack rejected the token: ${e.slackError}.` : 'Could not reach Slack — try again in a moment.' });
   }
+});
+
+// turn a plain channel name into its Slack ID for the rule editor, and confirm the bot can see it
+app.post('/api/integrations/slack/resolve-channel', requireEdit, async (req, res) => {
+  const name = String((req.body && req.body.channelName) || '').trim().replace(/^#/, '');
+  if (!name) return res.status(400).json({ ok: false, message: 'Enter a channel name.' });
+  try {
+    let cursor;
+    for (let i = 0; i < 20; i++) {
+      const j = await slackApi('conversations.list', { types: 'public_channel,private_channel', limit: 200, cursor });
+      const hit = (j.channels || []).find(c => c.name === name);
+      if (hit) return res.json({ ok: true, channelId: hit.id, isMember: !!hit.is_member });
+      cursor = j.response_metadata && j.response_metadata.next_cursor;
+      if (!cursor) break;
+    }
+    res.json({ ok: false, message: `No channel named "${name}" found — check the spelling, or the bot may need the channels:read scope.` });
+  } catch (e) {
+    if (e.code === 'not_configured') return res.status(503).json({ ok: false, message: 'Set SLACK_BOT_TOKEN first.' });
+    res.status(502).json({ ok: false, message: e.slackError ? `Slack error: ${e.slackError}` : 'Could not reach Slack.' });
+  }
+});
+
+// the actual webhook — Slack posts every message event here
+app.post('/api/slack/events', async (req, res) => {
+  const body = req.body || {};
+  if (body.type === 'url_verification') {
+    if (!verifySlackSignature(req)) return res.status(401).end();
+    return res.json({ challenge: body.challenge });
+  }
+  if (!verifySlackSignature(req)) return res.status(401).end();
+  res.status(200).end(); // ack within Slack's 3s window; everything below happens after
+
+  try {
+    const eventId = body.event_id;
+    if (eventId) {
+      if (db.prepare('SELECT 1 FROM slack_events WHERE event_id = ?').get(eventId)) return;
+      db.prepare('INSERT INTO slack_events (event_id, received_at) VALUES (?, ?)').run(eventId, new Date().toISOString());
+    }
+    const event = body.event;
+    // real new messages only — skip edits/deletes/joins and (once replies go out) the bot's own messages
+    if (!event || event.type !== 'message' || event.subtype || event.bot_id) return;
+    const text = (event.text || '').trim();
+    if (!text) return;
+
+    const state = getState().state;
+    const senderName = await slackUserName(event.user);
+    const now = new Date().toISOString(), today = todayKey();
+
+    if (event.channel_type === 'im') {
+      const item = { id: crypto.randomUUID(), title: `Reply to ${senderName} on Slack`, cat: 'slack', source: 'slack',
+        by: senderName, client: '', clientId: null, due: '', day: today, ts: now, done: false,
+        detail: text, slackChannelId: event.channel, slackChannelType: 'im' };
+      writeState(s => { s.queue = s.queue || []; s.queue.push(item); return s; }, `Slack DM from ${senderName}: ${text.slice(0, 80)}`);
+      return;
+    }
+
+    const rules = (state.settings && state.settings.slackRules) || [];
+    const rule = rules.find(r => r.channelId === event.channel);
+    if (!rule) return; // only the channels the owner has mapped create tasks
+    const domain = await getTeamDomain();
+    const permalink = slackPermalink(domain, event.channel, event.ts);
+    const item = { id: crypto.randomUUID(), title: rule.title, cat: rule.cat || 'other', source: 'slack',
+      by: senderName, client: '', clientId: null, due: '', day: today, ts: now, done: false,
+      detail: `${text}${permalink ? '\n' + permalink : ''}`, slackChannelId: event.channel, slackChannelType: 'channel' };
+    writeState(s => { s.queue = s.queue || []; s.queue.push(item); return s; }, `Slack #${rule.channelName}: ${rule.title}`);
+  } catch (e) {
+    console.error('slack event handling failed:', e.message);
+  }
+});
+
+// reply to a Slack DM straight from the Ledger — also closes out the queue item
+app.post('/api/slack/reply', requireEdit, async (req, res) => {
+  const queueItemId = req.body && req.body.queueItemId, text = req.body && req.body.text;
+  if (!queueItemId || !text || !String(text).trim()) return res.status(400).json({ error: 'invalid_input' });
+  const { state } = getState();
+  const item = (state.queue || []).find(q => q.id === queueItemId);
+  if (!item || !item.slackChannelId) return res.status(404).json({ error: 'not_found' });
+  try {
+    await slackApi('chat.postMessage', { channel: item.slackChannelId, text: String(text) });
+  } catch (e) {
+    if (e.code === 'not_configured') return res.status(503).json({ error: 'not_configured', message: 'Set SLACK_BOT_TOKEN first.' });
+    return res.status(502).json({ error: 'slack_failed', message: e.slackError ? `Slack rejected it: ${e.slackError}` : 'Could not reach Slack.' });
+  }
+  const now = new Date().toISOString();
+  const written = writeState(s => {
+    const q = (s.queue || []).find(x => x.id === queueItemId);
+    if (q) { q.done = true; q.doneDay = todayKey(); q.doneTs = now; }
+    return s;
+  }, `Replied on Slack: ${String(text).slice(0, 80)}`);
+  res.json({ ok: true, updatedAt: written.updatedAt });
 });
 
 app.use(express.static(path.join(__dirname, 'public')));

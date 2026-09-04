@@ -65,16 +65,37 @@ Litestream backups above with no extra setup. Export is **Copy** (clipboard) or
 
 ## Integrations (Setup → Integrations)
 
-Slack connection status only, for now — no live task ingestion yet, just confirms the bot
-token works so it's ready to build on:
+**Slack live tasks.** A message in a channel you've mapped (Setup → Integrations →
+Channel rules) lands in the Queue automatically, tagged with the category and title you
+gave that channel. Any DM to the bot always creates a "Reply to \<name\> on Slack" task —
+no rule needed — and you can answer it right from that task (a **Reply** button reveals a
+box; sending posts back to Slack and marks the task done).
+
+Setup steps in Slack, one time:
+1. Create (or reuse) an app at [api.slack.com/apps](https://api.slack.com/apps) →
+   **OAuth & Permissions** → Bot Token Scopes: `channels:history`, `groups:history`,
+   `im:history`, `chat:write`, `channels:read`, `groups:read`, `users:read` → **Install to
+   Workspace** (or **Reinstall** if scopes changed) → copy the **Bot User OAuth Token**.
+2. **Event Subscriptions** → on. Request URL: `https://ledger.cailinjustine.dev/api/slack/events`
+   (the app answers Slack's verification handshake automatically). Subscribe to bot
+   events: `message.channels`, `message.groups`, `message.im`. Save, then reinstall again
+   if Slack asks.
+3. Invite the bot to every channel you want mapped — `/invite @yourbot` in each one.
+   Slack only sends channel events for channels the bot is actually in.
+4. Copy the **Signing Secret** (Basic Information → App Credentials).
 
 | Variable | Example | Notes |
 |---|---|---|
-| `SLACK_BOT_TOKEN` | `xoxb-...` | From a Slack App you create at [api.slack.com/apps](https://api.slack.com/apps) → **OAuth & Permissions** → add Bot Token Scopes (e.g. `channels:history`, `groups:history`, `im:history`, `users:read` — not used yet, but reasonable to add now for later) → **Install to Workspace** → copy the **Bot User OAuth Token**. Without it, Setup shows "Slack not connected" — nothing else is affected. |
+| `SLACK_BOT_TOKEN` | `xoxb-...` | From step 1 above. Without it, Setup shows "Slack not connected" and nothing else is affected. |
+| `SLACK_SIGNING_SECRET` | … | From step 4. Required for the webhook — every request is verified against this; without it the webhook silently rejects everything (401), which is the safe failure mode. |
+
+Then in the app: Setup → Integrations → Channel rules → add a channel name (e.g.
+`new-sale`), a category, and a task title. The app resolves the name to Slack's internal
+channel ID for you and tells you if the bot isn't in it yet.
 
 Skool has no public developer API as of 2026 (no docs, no key dashboard) — the only
 official option is Zapier on Skool's Pro plan, and that's not something this app can key
-into. There's nothing to wire up there yet.
+into. There's nothing to wire up there.
 
 Leave `LITESTREAM_BUCKET` unset and the app just runs without off-host backup (fine for local Docker).
 

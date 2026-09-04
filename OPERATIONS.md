@@ -16,7 +16,8 @@ Last verified: 2026-09-03.
 | Cloudflare SSL mode | currently **Full** — should be **Full (strict)** (see one-time tasks) |
 | Off-site backups | **Litestream → Cloudflare R2 bucket `ledger-backups`, prefix `ledger/`** — running |
 | Railway env vars | `EDIT_KEY`, `TZ=America/Denver`, `LITESTREAM_BUCKET`, `LITESTREAM_ENDPOINT`, `LITESTREAM_ACCESS_KEY_ID`, `LITESTREAM_SECRET_ACCESS_KEY`, `LITESTREAM_REGION` |
-| AI Reports | `ANTHROPIC_API_KEY` added to Railway — **not yet confirmed working** (variable name/service/environment unverified). Check the Deploy Logs boot line: it ends `ai reports configured` or `ai reports NOT configured`. If the Update button in the Reports tab still 503s ("not configured"), the var is missing, misnamed, or on the wrong service/environment — see README → AI Reports. |
+| AI Reports | `ANTHROPIC_API_KEY` set on Railway and confirmed working (boot log ends `ai reports configured`). |
+| Slack live tasks | **Not yet set up in prod** — needs `SLACK_BOT_TOKEN` + `SLACK_SIGNING_SECRET` on Railway, Event Subscriptions pointed at `https://ledger.cailinjustine.dev/api/slack/events`, and the bot invited to the mapped channels. See README → Integrations for the full walkthrough. Until then, Setup shows "Slack not connected" and nothing else is affected. |
 
 ## Routine
 
