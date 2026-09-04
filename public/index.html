@@ -113,7 +113,7 @@ input[type=date],input[type=time]{font-family:var(--font-mono);font-size:13px}
 /* source/category chips are informational, not status — all sit on the same neutral .chip style below */
 
 /* queue */
-.qform{display:grid;grid-template-columns:2fr 150px 130px 1fr 140px auto;gap:8px;margin-bottom:6px;align-items:center}
+.qform{display:grid;grid-template-columns:2fr 150px 130px 1fr 140px auto auto;gap:8px;margin-bottom:6px;align-items:center}
 .qform input[type=text]{min-width:0}
 .qform2{display:grid;grid-template-columns:1fr 150px 140px;gap:8px;margin-bottom:14px;align-items:center}
 .qtools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
@@ -421,6 +421,7 @@ details.ob summary{cursor:pointer;font-size:12.5px;font-weight:600;font-family:v
         <input type="text" id="qBy" placeholder="Who (boss name / sender)" maxlength="40" autocomplete="off">
         <input type="date" id="qWhen" title="When it landed">
         <button class="btn primary" type="submit">Add to queue</button>
+        <button class="btn ghost" type="reset" title="Clear this form without adding it">Cancel</button>
       </div>
       <div class="qform2">
         <input type="text" id="qClient" list="clientNames" placeholder="Client it concerns (optional)" maxlength="200" autocomplete="off">
