@@ -131,8 +131,12 @@ Work top to bottom; each step tells you which layer is at fault.
 3. **Is the app itself up?** Railway → service → Deploy Logs. A healthy boot ends with `Daily Work Ledger on http://localhost:8080 (data: /data, edit key set)`. The red `ExperimentalWarning: SQLite` line is harmless — Node prints it to stderr.
 4. **Fallback that always works:** Railway → Networking → *Generate Domain* gives a `*.up.railway.app` URL bound straight to the service, no DNS involved. If that works, the app is fine and the issue is DNS/domain.
 
-## Unlocking from a new device
-Open `https://your-link/?key=YOUR_EDIT_KEY` once; the key is stored in that browser and stripped from the URL.
+## Unlocking
+The edit key is never remembered — every open or reload starts read-only, on every
+device, including yours. To edit: open `https://your-link/?key=YOUR_EDIT_KEY` (the key is
+stripped from the address bar right after, so it doesn't linger in history) or click
+**Unlock** and type it in. Either way it's good until you reload or close the tab, then
+it asks again. Bookmark the `?key=` link if you don't want to type it each time.
 
 ## Customizing
 The **Setup** section at the bottom of the page (owner only) edits the standing duties — rename the three email accounts there — and the tap-to-log actions. Changes save like everything else.

@@ -705,7 +705,9 @@ const statusEl = document.getElementById('status'), statusText = document.getEle
 function setStatus(cls, text) { statusEl.className = 'status ' + cls; statusText.textContent = text; }
 let dirty = false, saveTimer = null, saving = false;
 let baseVersion = null; // updatedAt of the state we last loaded/saved — sent back so the server can reject a stale overwrite
-let editKey = ''; try { editKey = localStorage.getItem('ledger-edit-key') || ''; } catch (e) {}
+// the edit key is never remembered — every open/reload starts read-only until the key is
+// supplied again (via ?key=... or Unlock), even on the owner's own device
+let editKey = ''; try { localStorage.removeItem('ledger-edit-key'); } catch (e) {}
 const headers = () => ({ 'Content-Type': 'application/json', ...(editKey ? { 'x-edit-key': editKey } : {}), ...(baseVersion ? { 'x-base-version': baseVersion } : {}) });
 function markDirty() {
   if (readOnly) return;
@@ -755,7 +757,7 @@ async function boot() {
     const me = await (await fetch('/api/me', { headers: headers() })).json();
     if (!me.canEdit) {
       const p = new URLSearchParams(location.search).get('key');
-      if (p) { editKey = p; try { localStorage.setItem('ledger-edit-key', p); } catch (e) {} history.replaceState(null, '', location.pathname); return boot(); }
+      if (p) { editKey = p; history.replaceState(null, '', location.pathname); return boot(); } // unlocked for this page load only — not remembered
       setReadOnly(true);
     }
     const st = await (await fetch('/api/state')).json();
@@ -768,10 +770,18 @@ async function boot() {
     loadSlackStatus();
   } catch (e) { setStatus('error', 'Could not reach the server'); console.error(e); }
 }
-document.getElementById('unlock').addEventListener('click', () => {
+document.getElementById('unlock').addEventListener('click', async () => {
   const k = prompt('Edit key (the EDIT_KEY set on the server):'); if (!k) return;
-  editKey = k.trim(); try { localStorage.setItem('ledger-edit-key', editKey); } catch (e) {}
-  location.reload();
+  const tryKey = k.trim(), prevKey = editKey;
+  editKey = tryKey; // not persisted — good for this tab until the next reload only
+  try {
+    const me = await (await fetch('/api/me', { headers: headers() })).json();
+    if (!me.canEdit) { editKey = prevKey; toast('That key is not correct.'); return; }
+    setReadOnly(false);
+    setStatus('saved', baseVersion ? 'Up to date · last save ' + fmtTime(baseVersion) : 'Up to date');
+    render(); loadDays(); loadReportsTab(); loadSlackStatus();
+    toast('Unlocked for this session — reloading will ask again.');
+  } catch (e) { editKey = prevKey; toast('Could not reach the server.'); }
 });
 let DAYS = [];
 async function loadDays() {
